@@ -1,0 +1,53 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - vibehack
+
+  dashboard:
+    build: ./dashboard
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "3001:3001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./projects:/projects
+      - ./data:/data
+    networks:
+      - vibehack
+    depends_on:
+      - redis
+
+  bot:
+    build: ./bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DASHBOARD_API_URL=http://dashboard:3001
+    networks:
+      - vibehack
+    depends_on:
+      - redis
+      - dashboard
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - vibehack
+    depends_on:
+      - dashboard
+
+networks:
+  vibehack:
+    name: vibehack
+    driver: bridge
