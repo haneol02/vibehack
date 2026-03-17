@@ -30,6 +30,21 @@ router.post('/:slug/stop', async (req, res) => {
   }
 });
 
+router.post('/:slug/send', async (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: 'text required' });
+
+  const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
+  if (!project) return res.status(404).json({ error: 'project not found' });
+
+  try {
+    await sessionManager.send(project.slug, text);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:slug/log', async (req, res) => {
   const log = await sessionManager.getLog(req.params.slug);
   res.json({ log });

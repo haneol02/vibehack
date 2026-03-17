@@ -88,6 +88,17 @@ export const sessionManager = {
     return session;
   },
 
+  async send(projectSlug, text) {
+    const containerName = `vibehack-session-${projectSlug}`;
+    const container = docker.getContainer(containerName);
+    const exec = await container.exec({
+      Cmd: ['tmux', 'send-keys', '-t', projectSlug, text, 'Enter'],
+      AttachStdout: true,
+      AttachStderr: true,
+    });
+    await exec.start({});
+  },
+
   async getLog(projectSlug) {
     const containerName = `vibehack-session-${projectSlug}`;
     try {

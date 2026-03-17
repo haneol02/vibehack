@@ -8,7 +8,11 @@ mkdir -p "$WORKSPACE"
 cd "$WORKSPACE"
 
 # Start tmux session if not exists
-tmux new-session -d -s "$SESSION_NAME" -c "$WORKSPACE" 2>/dev/null || true
+if tmux new-session -d -s "$SESSION_NAME" -c "$WORKSPACE" 2>/dev/null; then
+  # New session - auto start claude
+  sleep 1
+  tmux send-keys -t "$SESSION_NAME" "claude" Enter
+fi
 
 # Set ANTHROPIC_API_KEY in tmux environment (API 키 방식)
 if [ -n "$ANTHROPIC_API_KEY" ]; then
