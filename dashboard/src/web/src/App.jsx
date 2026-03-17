@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard.jsx';
 import Session from './Session.jsx';
+import Login from './Login.jsx';
 
-function Nav() {
+function Nav({ onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isSession = location.pathname.startsWith('/project/');
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    onLogout();
+  };
 
   return (
     <nav style={{
@@ -26,20 +32,34 @@ function Nav() {
         Vibe<span style={{ color: '#5b8af5' }}>Hack</span>
       </Link>
 
-      {isSession && (
-        <button onClick={() => navigate('/')} style={{
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        {isSession && (
+          <button onClick={() => navigate('/')} style={{
+            background: 'none',
+            border: '1px solid #1e2235',
+            color: '#8892a4',
+            padding: '5px 14px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 500,
+          }}>
+            ← 돌아가기
+          </button>
+        )}
+        <button onClick={handleLogout} style={{
           background: 'none',
           border: '1px solid #1e2235',
-          color: '#8892a4',
+          color: '#484d5a',
           padding: '5px 14px',
           borderRadius: '6px',
           cursor: 'pointer',
           fontSize: '13px',
           fontWeight: 500,
         }}>
-          ← 돌아가기
+          로그아웃
         </button>
-      )}
+      </div>
     </nav>
   );
 }
@@ -50,10 +70,24 @@ function SessionPage() {
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(r => r.json())
+      .then(data => setAuthenticated(data.authenticated));
+  }, []);
+
+  if (authenticated === null) return null;
+
+  if (!authenticated) {
+    return <Login onLogin={() => setAuthenticated(true)} />;
+  }
+
   return (
     <BrowserRouter>
       <div style={{ minHeight: '100vh', background: '#08090e', color: '#e8eaf0', fontFamily: "'Pretendard', 'Noto Sans KR', 'Segoe UI', sans-serif" }}>
-        <Nav />
+        <Nav onLogout={() => setAuthenticated(false)} />
         <div>
           <Routes>
             <Route path="/" element={<Dashboard />} />

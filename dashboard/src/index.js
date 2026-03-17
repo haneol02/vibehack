@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
 import { createServer } from 'http';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -20,15 +21,47 @@ const server = createServer(app);
 
 app.use(cors());
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'vibehack-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { httpOnly: true },
+}));
 
-// API Routes
-app.use('/api/projects', projectsRouter);
-app.use('/api/sessions', sessionsRouter);
-app.use('/api/apps', appsRouter);
-app.use('/api/events', eventsRouter);
+// Auth endpoints (no auth required)
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === process.env.AUTH_USERNAME && password === process.env.AUTH_PASSWORD) {
+    req.session.authenticated = true;
+    res.json({ ok: true });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.destroy();
+  res.json({ ok: true });
+});
+
+app.get('/api/auth/me', (req, res) => {
+  res.json({ authenticated: !!req.session.authenticated });
+});
+
+// Auth middleware
+const requireAuth = (req, res, next) => {
+  if (req.session.authenticated) return next();
+  res.status(401).json({ error: 'Unauthorized' });
+};
+
+// Protected API Routes
+app.use('/api/projects', requireAuth, projectsRouter);
+app.use('/api/sessions', requireAuth, sessionsRouter);
+app.use('/api/apps', requireAuth, appsRouter);
+app.use('/api/events', requireAuth, eventsRouter);
 
 // Proxy for session containers (ttyd WebSocket) and app subdomains
-app.use('/proxy', proxyRouter);
+app.use('/proxy', requireAuth, proxyRouter);
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
