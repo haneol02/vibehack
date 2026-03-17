@@ -175,10 +175,13 @@ function NewProjectView({ newName, setNewName, loading, focused, setFocused, cre
 }
 
 function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProject, onDeactivateProject }) {
-  const statusColor = (status) => {
-    if (status === 'active') return '#3fb950';
-    if (status === 'running') return '#5b8af5';
+  const statusColor = (sessionStatus) => {
+    if (sessionStatus === 'running') return '#3fb950';
     return '#2e3244';
+  };
+
+  const statusLabel = (sessionStatus) => {
+    return sessionStatus === 'running' ? '실행 중' : '중단됨';
   };
 
   return (
@@ -224,7 +227,7 @@ function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProj
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
           {projects.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} onDelete={onDeleteProject} onDeactivate={onDeactivateProject} statusColor={statusColor} />
+            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} onDelete={onDeleteProject} onDeactivate={onDeactivateProject} statusColor={statusColor} statusLabel={statusLabel} />
           ))}
         </div>
       )}
@@ -232,7 +235,7 @@ function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProj
   );
 }
 
-function ProjectCard({ project: p, onClick, onDelete, onDeactivate, statusColor }) {
+function ProjectCard({ project: p, onClick, onDelete, onDeactivate, statusColor, statusLabel }) {
   const [hovered, setHovered] = useState(false);
   const initial = p.name ? p.name[0].toUpperCase() : '?';
 
@@ -262,11 +265,11 @@ function ProjectCard({ project: p, onClick, onDelete, onDeactivate, statusColor 
         </div>
         <span style={{
           display: 'flex', alignItems: 'center', gap: '5px',
-          fontSize: '11px', color: statusColor(p.status),
+          fontSize: '11px', color: statusColor(p.session_status),
           fontWeight: 500,
         }}>
-          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: statusColor(p.status), flexShrink: 0 }} />
-          {p.status}
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: statusColor(p.session_status), flexShrink: 0 }} />
+          {statusLabel(p.session_status)}
         </span>
       </div>
 
