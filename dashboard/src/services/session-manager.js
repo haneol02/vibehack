@@ -40,7 +40,7 @@ export const sessionManager = {
     }
 
     // ~/.claude 마운트: claude login 인증 정보 공유
-    const homeDir = process.env.HOME || '/root';
+    const homeDir = process.env.HOST_HOME || process.env.HOME || '/root';
     const binds = [
       `/projects/${projectSlug}:/workspace/${projectSlug}`,
       `${homeDir}/.claude:/root/.claude:ro`,
