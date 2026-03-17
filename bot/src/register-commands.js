@@ -30,6 +30,11 @@ const commands = [
       .setDescription('활성 세션/앱 목록')
     )
     .addSubcommand(sub => sub
+      .setName('start')
+      .setDescription('Claude 세션 시작 (재활성화)')
+      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
+    )
+    .addSubcommand(sub => sub
       .setName('stop')
       .setDescription('Claude 세션 중단')
       .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))

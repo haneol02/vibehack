@@ -100,6 +100,18 @@ export const hackCommand = {
           break;
         }
 
+        case 'start': {
+          const slug = interaction.options.getString('slug');
+          const session = await api(`/api/sessions/${slug}/start`, 'POST');
+          if (session.error) {
+            return interaction.editReply(`❌ ${session.error}`);
+          }
+          const domain = process.env.DOMAIN || 'localhost';
+          const sessionUrl = `https://${domain}/proxy/session/${slug}/`;
+          await interaction.editReply(`▶ \`${slug}\` 세션이 시작되었습니다.\n🔗 ${sessionUrl}`);
+          break;
+        }
+
         case 'stop': {
           const slug = interaction.options.getString('slug');
           await api(`/api/sessions/${slug}/stop`, 'POST');
