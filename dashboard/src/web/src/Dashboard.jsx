@@ -13,6 +13,12 @@ export default function Dashboard({ activeTab, onSelectProject, onTabChange }) {
 
   useEffect(() => { loadProjects(); }, []);
 
+  const deleteProject = async (slug) => {
+    if (!confirm(`"${slug}" 프로젝트를 삭제할까요?`)) return;
+    await fetch(`/api/projects/${slug}`, { method: 'DELETE' });
+    loadProjects();
+  };
+
   const createProject = async () => {
     if (!newName.trim()) return;
     setLoading(true);
@@ -53,6 +59,7 @@ export default function Dashboard({ activeTab, onSelectProject, onTabChange }) {
           projects={projects}
           onSelectProject={onSelectProject}
           onNewProject={() => onTabChange('new')}
+          onDeleteProject={deleteProject}
         />
       )}
     </div>
@@ -161,7 +168,7 @@ function NewProjectView({ newName, setNewName, loading, focused, setFocused, cre
   );
 }
 
-function ProjectListView({ projects, onSelectProject, onNewProject }) {
+function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProject }) {
   const statusColor = (status) => {
     if (status === 'active') return '#3fb950';
     if (status === 'running') return '#5b8af5';
@@ -211,7 +218,7 @@ function ProjectListView({ projects, onSelectProject, onNewProject }) {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
           {projects.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} statusColor={statusColor} />
+            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} onDelete={onDeleteProject} statusColor={statusColor} />
           ))}
         </div>
       )}
@@ -219,7 +226,7 @@ function ProjectListView({ projects, onSelectProject, onNewProject }) {
   );
 }
 
-function ProjectCard({ project: p, onClick, statusColor }) {
+function ProjectCard({ project: p, onClick, onDelete, statusColor }) {
   const [hovered, setHovered] = useState(false);
   const initial = p.name ? p.name[0].toUpperCase() : '?';
 
@@ -235,6 +242,7 @@ function ProjectCard({ project: p, onClick, statusColor }) {
         padding: '18px',
         cursor: 'pointer',
         transition: 'all 0.15s',
+        position: 'relative',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -257,7 +265,26 @@ function ProjectCard({ project: p, onClick, statusColor }) {
       </div>
 
       <div style={{ fontWeight: 600, fontSize: '14px', color: '#c8ccd8', marginBottom: '4px' }}>{p.name}</div>
-      <div style={{ color: '#252838', fontSize: '11px', fontFamily: 'monospace', letterSpacing: '0.3px' }}>{p.slug}</div>
+      <div style={{ color: '#252838', fontSize: '11px', fontFamily: 'monospace', letterSpacing: '0.3px', marginBottom: '12px' }}>{p.slug}</div>
+
+      <button
+        onClick={e => { e.stopPropagation(); onDelete(p.slug); }}
+        style={{
+          background: 'none',
+          border: '1px solid #2a1a1a',
+          color: '#6b3030',
+          padding: '4px 10px',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          fontSize: '11px',
+          width: '100%',
+          transition: 'all 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = '#1a0a0a'; e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+      >
+        삭제
+      </button>
     </div>
   );
 }
