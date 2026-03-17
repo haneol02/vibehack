@@ -5,8 +5,8 @@ export default function Session({ slug }) {
   const [session, setSession] = useState(null);
   const [app, setApp] = useState(null);
   const [startCmd, setStartCmd] = useState('npm start');
-  const [iframeKey, setIframeKey] = useState(0);
-  const [iframeReady, setIframeReady] = useState(false);
+  const [ttydReady, setTtydReady] = useState(false);
+  const [connectAttempt, setConnectAttempt] = useState(0);
   const domain = window.location.hostname;
 
   useEffect(() => {
@@ -22,6 +22,32 @@ export default function Session({ slug }) {
     const interval = setInterval(load, 5000);
     return () => clearInterval(interval);
   }, [slug]);
+
+  // Reset when session restarts
+  useEffect(() => {
+    if (session?.status !== 'running') {
+      setTtydReady(false);
+      setConnectAttempt(0);
+    }
+  }, [session?.status]);
+
+  // Poll ttyd until it's ready
+  useEffect(() => {
+    if (!session || session.status !== 'running' || ttydReady) return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const res = await fetch(`/proxy/session/${slug}/`, { method: 'HEAD' });
+        if (res.ok && !cancelled) { setTtydReady(true); return; }
+      } catch {}
+      if (!cancelled) {
+        setConnectAttempt(n => n + 1);
+        setTimeout(poll, 2000);
+      }
+    };
+    poll();
+    return () => { cancelled = true; };
+  }, [session?.status, slug]);
 
   const startApp = async () => {
     const res = await fetch(`/api/apps/${slug}/start`, {
@@ -46,20 +72,21 @@ export default function Session({ slug }) {
         <div style={{ flex: 1, background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
           {session?.status === 'running' ? (
             <>
-              {!iframeReady && (
+              {!ttydReady && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#8b949e', gap: '12px' }}>
-                  <div style={{ fontSize: '13px' }}>세션 시작 중...</div>
-                  <div style={{ fontSize: '11px', color: '#484d5a' }}>잠시 기다려주세요</div>
+                  <div style={{ fontSize: '13px' }}>터미널 연결 중...</div>
+                  <div style={{ fontSize: '11px', color: '#484d5a' }}>
+                    {connectAttempt === 0 ? '잠시 기다려주세요' : `재시도 중... (${connectAttempt})`}
+                  </div>
                 </div>
               )}
-              <iframe
-                key={iframeKey}
-                src={sessionUrl}
-                style={{ width: '100%', height: '100%', border: 'none', opacity: iframeReady ? 1 : 0 }}
-                title="Claude Code Session"
-                onLoad={() => setIframeReady(true)}
-                onError={() => setTimeout(() => { setIframeKey(k => k + 1); setIframeReady(false); }, 2000)}
-              />
+              {ttydReady && (
+                <iframe
+                  src={sessionUrl}
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  title="Claude Code Session"
+                />
+              )}
             </>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#8b949e' }}>
