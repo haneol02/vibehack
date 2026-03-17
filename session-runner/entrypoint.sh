@@ -8,7 +8,7 @@ mkdir -p "$WORKSPACE"
 cd "$WORKSPACE"
 
 # Start tmux session if not exists
-if tmux new-session -d -s "$SESSION_NAME" -c "$WORKSPACE" 2>/dev/null; then
+if tmux new-session -d -s "$SESSION_NAME" -u -c "$WORKSPACE" 2>/dev/null; then
   # New session - auto start claude
   sleep 1
   tmux send-keys -t "$SESSION_NAME" "claude" Enter
