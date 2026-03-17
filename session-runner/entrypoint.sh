@@ -25,6 +25,6 @@ fi
 exec ttyd \
     --port 7681 \
     --writable \
-    -t rendererType=webgl \
+    -t rendererType=canvas \
     -t fontSize=14 \
     bash -c 'LINKED=$(tmux new-session -d -t "$SESSION_NAME" -P -F "#{session_name}") && tmux attach-session -t "$LINKED"; tmux kill-session -t "$LINKED" 2>/dev/null'
