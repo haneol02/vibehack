@@ -22,7 +22,7 @@ router.use('/session/:slug', (req, res) => {
   // Rewrite path
   req.url = req.url.replace(`/session/${req.params.slug}`, '') || '/';
 
-  proxy.web(req, res, { target: `http://localhost:${session.port}` });
+  proxy.web(req, res, { target: `http://${session.container_name}:7681` });
 });
 
 // Proxy app subdomain requests (nginx wildcard sends /proxy/app/:slug)
@@ -32,7 +32,7 @@ router.use('/app/:slug', (req, res) => {
   if (!appRow) return res.status(503).send(`<h1>App "${slug}" is not running</h1>`);
 
   req.url = req.url.replace(`/proxy/app/${slug}`, '') || '/';
-  proxy.web(req, res, { target: `http://localhost:${appRow.port}` });
+  proxy.web(req, res, { target: `http://${appRow.container_name}:${appRow.app_port}` });
 });
 
 export { proxy };

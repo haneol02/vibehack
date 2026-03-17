@@ -37,6 +37,7 @@ db.exec(`
     container_id TEXT,
     container_name TEXT,
     port INTEGER,
+    app_port INTEGER DEFAULT 3000,
     subdomain TEXT UNIQUE,
     status TEXT DEFAULT 'stopped',
     start_command TEXT,

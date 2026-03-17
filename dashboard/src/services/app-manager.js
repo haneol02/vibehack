@@ -76,9 +76,9 @@ export const appManager = {
     updateNginxAppConfig(subdomain, hostPort);
 
     db.prepare(`
-      INSERT OR REPLACE INTO apps (id, project_id, container_id, container_name, port, subdomain, status, start_command)
-      VALUES (?, ?, ?, ?, ?, ?, 'running', ?)
-    `).run(appId, projectId, container.id, containerName, hostPort, subdomain, startCommand);
+      INSERT OR REPLACE INTO apps (id, project_id, container_id, container_name, port, app_port, subdomain, status, start_command)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?)
+    `).run(appId, projectId, container.id, containerName, hostPort, appPort, subdomain, startCommand);
 
     const domain = process.env.DOMAIN || 'localhost';
     const url = `https://${subdomain}.${domain}`;
