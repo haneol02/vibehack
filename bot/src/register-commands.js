@@ -39,6 +39,11 @@ const commands = [
       .setDescription('최근 tmux 스크롤백')
       .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
     )
+    .addSubcommand(sub => sub
+      .setName('delete')
+      .setDescription('프로젝트 완전 삭제 (컨테이너 + 데이터 모두 제거)')
+      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
+    )
     .toJSON()
 ];
 

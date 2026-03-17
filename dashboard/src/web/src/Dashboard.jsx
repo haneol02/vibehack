@@ -13,8 +13,13 @@ export default function Dashboard({ activeTab, onSelectProject, onTabChange }) {
 
   useEffect(() => { loadProjects(); }, []);
 
+  const deactivateProject = async (slug) => {
+    await fetch(`/api/sessions/${slug}/stop`, { method: 'POST' });
+    loadProjects();
+  };
+
   const deleteProject = async (slug) => {
-    if (!confirm(`"${slug}" 프로젝트를 삭제할까요?`)) return;
+    if (!confirm(`"${slug}" 프로젝트를 삭제할까요?\n컨테이너와 데이터가 모두 제거됩니다.`)) return;
     await fetch(`/api/projects/${slug}`, { method: 'DELETE' });
     loadProjects();
   };
@@ -60,6 +65,7 @@ export default function Dashboard({ activeTab, onSelectProject, onTabChange }) {
           onSelectProject={onSelectProject}
           onNewProject={() => onTabChange('new')}
           onDeleteProject={deleteProject}
+          onDeactivateProject={deactivateProject}
         />
       )}
     </div>
@@ -168,7 +174,7 @@ function NewProjectView({ newName, setNewName, loading, focused, setFocused, cre
   );
 }
 
-function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProject }) {
+function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProject, onDeactivateProject }) {
   const statusColor = (status) => {
     if (status === 'active') return '#3fb950';
     if (status === 'running') return '#5b8af5';
@@ -218,7 +224,7 @@ function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProj
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
           {projects.map(p => (
-            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} onDelete={onDeleteProject} statusColor={statusColor} />
+            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} onDelete={onDeleteProject} onDeactivate={onDeactivateProject} statusColor={statusColor} />
           ))}
         </div>
       )}
@@ -226,7 +232,7 @@ function ProjectListView({ projects, onSelectProject, onNewProject, onDeleteProj
   );
 }
 
-function ProjectCard({ project: p, onClick, onDelete, statusColor }) {
+function ProjectCard({ project: p, onClick, onDelete, onDeactivate, statusColor }) {
   const [hovered, setHovered] = useState(false);
   const initial = p.name ? p.name[0].toUpperCase() : '?';
 
@@ -267,24 +273,44 @@ function ProjectCard({ project: p, onClick, onDelete, statusColor }) {
       <div style={{ fontWeight: 600, fontSize: '14px', color: '#c8ccd8', marginBottom: '4px' }}>{p.name}</div>
       <div style={{ color: '#252838', fontSize: '11px', fontFamily: 'monospace', letterSpacing: '0.3px', marginBottom: '12px' }}>{p.slug}</div>
 
-      <button
-        onClick={e => { e.stopPropagation(); onDelete(p.slug); }}
-        style={{
-          background: 'none',
-          border: '1px solid #2a1a1a',
-          color: '#6b3030',
-          padding: '4px 10px',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          fontSize: '11px',
-          width: '100%',
-          transition: 'all 0.15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = '#1a0a0a'; e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
-      >
-        삭제
-      </button>
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button
+          onClick={e => { e.stopPropagation(); onDeactivate(p.slug); }}
+          style={{
+            background: 'none',
+            border: '1px solid #1a1d2e',
+            color: '#484d5a',
+            padding: '4px 10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '11px',
+            flex: 1,
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#0d0e18'; e.currentTarget.style.color = '#8b949e'; e.currentTarget.style.borderColor = '#2a3050'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#484d5a'; e.currentTarget.style.borderColor = '#1a1d2e'; }}
+        >
+          비활성화
+        </button>
+        <button
+          onClick={e => { e.stopPropagation(); onDelete(p.slug); }}
+          style={{
+            background: 'none',
+            border: '1px solid #2a1a1a',
+            color: '#6b3030',
+            padding: '4px 10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '11px',
+            flex: 1,
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#1a0a0a'; e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+        >
+          삭제
+        </button>
+      </div>
     </div>
   );
 }

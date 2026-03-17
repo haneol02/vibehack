@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { db } from '../services/db.js';
+import { sessionManager } from '../services/session-manager.js';
+import { appManager } from '../services/app-manager.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
@@ -38,8 +40,20 @@ router.get('/:slug', (req, res) => {
   res.json(project);
 });
 
-router.delete('/:slug', (req, res) => {
-  db.prepare('UPDATE projects SET status = ? WHERE slug = ?').run('archived', req.params.slug);
+router.delete('/:slug', async (req, res) => {
+  const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
+  if (!project) return res.status(404).json({ error: 'not found' });
+
+  try {
+    await sessionManager.stop(project.id, project.slug).catch(() => {});
+    await appManager.stop(project.id, project.slug).catch(() => {});
+  } catch {}
+
+  db.prepare('DELETE FROM sessions WHERE project_id = ?').run(project.id);
+  db.prepare('DELETE FROM apps WHERE project_id = ?').run(project.id);
+  db.prepare('DELETE FROM events WHERE project_id = ?').run(project.id);
+  db.prepare('DELETE FROM projects WHERE id = ?').run(project.id);
+
   res.json({ ok: true });
 });
 

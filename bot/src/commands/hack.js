@@ -114,6 +114,16 @@ export const hackCommand = {
           await interaction.editReply(`\`\`\`\n${truncated}\n\`\`\``);
           break;
         }
+
+        case 'delete': {
+          const slug = interaction.options.getString('slug');
+          const result = await api(`/api/projects/${slug}`, 'DELETE');
+          if (result.error) {
+            return interaction.editReply(`❌ ${result.error}`);
+          }
+          await interaction.editReply(`🗑 \`${slug}\` 프로젝트가 삭제되었습니다.`);
+          break;
+        }
       }
     } catch (err) {
       console.error('Command error:', err);
