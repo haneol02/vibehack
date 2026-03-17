@@ -20,5 +20,4 @@ fi
 exec ttyd \
     --port 7681 \
     --writable \
-    --credential "${TTYD_USER:-user}:${TTYD_PASS:-hackathon}" \
     tmux attach-session -t "$SESSION_NAME"
