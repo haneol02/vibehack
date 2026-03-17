@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 const router = Router();
 
 router.get('/', (req, res) => {
-  const projects = db.prepare('SELECT * FROM projects ORDER BY created_at DESC').all();
+  const projects = db.prepare("SELECT * FROM projects WHERE status != 'archived' ORDER BY created_at DESC").all();
   res.json(projects);
 });
 
