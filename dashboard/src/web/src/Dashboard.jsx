@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Dashboard({ onSelectProject }) {
+export default function Dashboard({ activeTab, onSelectProject, onTabChange }) {
   const [projects, setProjects] = useState([]);
   const [newName, setNewName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,86 +25,79 @@ export default function Dashboard({ onSelectProject }) {
     if (!project.error) {
       await fetch(`/api/sessions/${project.slug}/start`, { method: 'POST' });
       setNewName('');
-      loadProjects();
       onSelectProject(project.slug);
     }
     setLoading(false);
   };
 
-  const statusColor = (status) => {
-    if (status === 'active') return '#3fb950';
-    if (status === 'running') return '#5b8af5';
-    return '#484d5a';
-  };
-
   return (
     <div>
-      {/* Hero Section */}
-      <div style={{
-        padding: '80px 32px 60px',
-        textAlign: 'center',
-        maxWidth: '720px',
-        margin: '0 auto',
-      }}>
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          background: 'rgba(91,138,245,0.1)',
-          border: '1px solid rgba(91,138,245,0.25)',
-          borderRadius: '20px',
-          padding: '5px 14px',
-          fontSize: '12px',
-          color: '#7aa0f7',
-          marginBottom: '28px',
-          fontWeight: 500,
-          letterSpacing: '0.3px',
-        }}>
-          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#5b8af5' }} />
-          AI Hackathon Builder
-        </div>
+      <style>{`
+        .hero-title { white-space: nowrap; }
+        @media (max-width: 560px) { .hero-title { white-space: normal; } }
+      `}</style>
 
-        <h1 style={{
-          fontSize: 'clamp(36px, 5vw, 56px)',
-          fontWeight: 800,
-          lineHeight: 1.15,
-          letterSpacing: '-1px',
-          marginBottom: '16px',
-          color: '#f0f1f7',
-        }}>
+      {activeTab === 'new' ? (
+        <NewProjectView
+          newName={newName}
+          setNewName={setNewName}
+          loading={loading}
+          focused={focused}
+          setFocused={setFocused}
+          createProject={createProject}
+          onViewProjects={() => onTabChange('list')}
+          projectCount={projects.length}
+        />
+      ) : (
+        <ProjectListView
+          projects={projects}
+          onSelectProject={onSelectProject}
+          onNewProject={() => onTabChange('new')}
+        />
+      )}
+    </div>
+  );
+}
+
+function NewProjectView({ newName, setNewName, loading, focused, setFocused, createProject, onViewProjects, projectCount }) {
+  return (
+    <div style={{ padding: '72px 24px 60px', textAlign: 'center' }}>
+      <div style={{ maxWidth: '580px', margin: '0 auto' }}>
+        <h1
+          className="hero-title"
+          style={{
+            fontSize: 'clamp(28px, 4vw, 48px)',
+            fontWeight: 800,
+            lineHeight: 1.2,
+            letterSpacing: '-1.5px',
+            marginBottom: '14px',
+            color: '#f0f1f7',
+          }}
+        >
           아이디어를{' '}
           <span style={{
-            background: 'linear-gradient(135deg, #5b8af5 0%, #8b5cf6 100%)',
+            background: 'linear-gradient(135deg, #5b8af5, #9b72f5)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>
-            실행 가능한 앱
+            실행 가능한 앱으로
           </span>
-          으로
         </h1>
 
-        <p style={{
-          color: '#5a6070',
-          fontSize: '16px',
-          lineHeight: 1.7,
-          marginBottom: '40px',
-        }}>
-          프로젝트 이름을 입력하고 AI와 함께 해커톤을 시작하세요.
+        <p style={{ color: '#3e4358', fontSize: '15px', lineHeight: 1.7, marginBottom: '36px' }}>
+          프로젝트 이름을 입력하면 AI가 환경을 구성하고 개발을 시작합니다.
         </p>
 
-        {/* Create Input */}
         <div style={{
           display: 'flex',
-          gap: '10px',
-          background: '#0e0f17',
-          border: `1px solid ${focused ? 'rgba(91,138,245,0.5)' : '#1e2130'}`,
-          borderRadius: '14px',
-          padding: '8px 8px 8px 20px',
-          transition: 'border-color 0.2s, box-shadow 0.2s',
-          boxShadow: focused ? '0 0 0 3px rgba(91,138,245,0.08)' : 'none',
-          maxWidth: '560px',
-          margin: '0 auto',
+          background: '#0c0d15',
+          border: `1px solid ${focused ? '#3a4a7a' : '#1a1d2e'}`,
+          borderRadius: '12px',
+          padding: '6px 6px 6px 18px',
+          transition: 'border-color 0.2s',
+          boxShadow: focused ? '0 0 0 3px rgba(91,138,245,0.07)' : 'none',
+          marginBottom: '20px',
         }}>
           <input
             value={newName}
@@ -112,7 +105,7 @@ export default function Dashboard({ onSelectProject }) {
             onKeyDown={e => e.key === 'Enter' && createProject()}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder="프로젝트 이름을 입력하세요..."
+            placeholder="프로젝트 이름..."
             style={{
               background: 'none',
               border: 'none',
@@ -121,71 +114,105 @@ export default function Dashboard({ onSelectProject }) {
               fontSize: '15px',
               flex: 1,
               minWidth: 0,
+              padding: '6px 0',
             }}
           />
           <button
             onClick={createProject}
             disabled={loading}
             style={{
-              background: loading ? '#2a2d3e' : 'linear-gradient(135deg, #5b8af5, #7c6af7)',
+              background: loading ? '#1a1d2e' : '#5b8af5',
               border: 'none',
               color: 'white',
-              padding: '10px 22px',
-              borderRadius: '10px',
+              padding: '10px 20px',
+              borderRadius: '8px',
               cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: 600,
               whiteSpace: 'nowrap',
-              transition: 'opacity 0.2s',
-              opacity: loading ? 0.6 : 1,
               flexShrink: 0,
+              opacity: loading ? 0.5 : 1,
+              transition: 'background 0.2s, opacity 0.2s',
             }}
           >
-            {loading ? '생성 중...' : '🚀 시작하기'}
+            {loading ? '생성 중...' : '시작하기'}
           </button>
         </div>
+
+        {projectCount > 0 && (
+          <button
+            onClick={onViewProjects}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#3e4358',
+              fontSize: '13px',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+            }}
+          >
+            기존 프로젝트 {projectCount}개 보기
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProjectListView({ projects, onSelectProject, onNewProject }) {
+  const statusColor = (status) => {
+    if (status === 'active') return '#3fb950';
+    if (status === 'running') return '#5b8af5';
+    return '#2e3244';
+  };
+
+  return (
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 32px 60px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#c8ccd8', marginBottom: '4px' }}>내 프로젝트</h2>
+          <p style={{ fontSize: '13px', color: '#2e3244' }}>{projects.length}개의 프로젝트</p>
+        </div>
+        <button
+          onClick={onNewProject}
+          style={{
+            background: '#5b8af5',
+            border: 'none',
+            color: 'white',
+            padding: '8px 18px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 600,
+          }}
+        >
+          + 새 프로젝트
+        </button>
       </div>
 
-      {/* Project List */}
-      {projects.length > 0 && (
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 32px 60px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
+      {projects.length === 0 ? (
+        <div style={{
+          textAlign: 'center',
+          padding: '80px 24px',
+          border: '1px dashed #16182a',
+          borderRadius: '12px',
+          color: '#2e3244',
+        }}>
+          <div style={{ fontSize: '13px', marginBottom: '12px' }}>아직 프로젝트가 없습니다</div>
+          <button onClick={onNewProject} style={{
+            background: 'none', border: '1px solid #1a1d2e', color: '#484d5a',
+            padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px',
           }}>
-            <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#8892a4', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-              프로젝트
-            </h2>
-            <span style={{
-              background: '#12131e',
-              border: '1px solid #1e2130',
-              color: '#5a6070',
-              fontSize: '12px',
-              padding: '3px 10px',
-              borderRadius: '10px',
-            }}>
-              {projects.length}개
-            </span>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '14px',
-          }}>
-            {projects.map(p => (
-              <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} statusColor={statusColor} />
-            ))}
-          </div>
+            첫 프로젝트 만들기
+          </button>
         </div>
-      )}
-
-      {projects.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '40px 32px', color: '#2e3244' }}>
-          <div style={{ fontSize: '40px', marginBottom: '12px' }}>🚀</div>
-          <div style={{ fontSize: '14px' }}>첫 번째 프로젝트를 만들어보세요</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+          {projects.map(p => (
+            <ProjectCard key={p.id} project={p} onClick={() => onSelectProject(p.slug)} statusColor={statusColor} />
+          ))}
         </div>
       )}
     </div>
@@ -194,6 +221,7 @@ export default function Dashboard({ onSelectProject }) {
 
 function ProjectCard({ project: p, onClick, statusColor }) {
   const [hovered, setHovered] = useState(false);
+  const initial = p.name ? p.name[0].toUpperCase() : '?';
 
   return (
     <div
@@ -201,44 +229,35 @@ function ProjectCard({ project: p, onClick, statusColor }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? '#0e0f17' : '#0b0c14',
-        border: `1px solid ${hovered ? 'rgba(91,138,245,0.35)' : '#1a1d2e'}`,
-        borderRadius: '12px',
-        padding: '20px',
+        background: hovered ? '#0d0e18' : '#0b0c15',
+        border: `1px solid ${hovered ? '#2a3050' : '#14162a'}`,
+        borderRadius: '10px',
+        padding: '18px',
         cursor: 'pointer',
-        transition: 'all 0.2s',
-        boxShadow: hovered ? '0 4px 24px rgba(91,138,245,0.08)' : 'none',
+        transition: 'all 0.15s',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
         <div style={{
-          width: '36px', height: '36px', borderRadius: '10px',
-          background: 'linear-gradient(135deg, rgba(91,138,245,0.2), rgba(139,92,246,0.2))',
-          border: '1px solid rgba(91,138,245,0.2)',
+          width: '34px', height: '34px', borderRadius: '8px',
+          background: 'linear-gradient(135deg, #1e2a50, #241a3a)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '16px',
+          fontSize: '14px', fontWeight: 700, color: '#7090d0',
         }}>
-          ⚡
+          {initial}
         </div>
         <span style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '5px',
-          fontSize: '11px',
-          color: statusColor(p.status),
-          background: `${statusColor(p.status)}18`,
-          border: `1px solid ${statusColor(p.status)}30`,
-          padding: '3px 9px',
-          borderRadius: '10px',
+          display: 'flex', alignItems: 'center', gap: '5px',
+          fontSize: '11px', color: statusColor(p.status),
           fontWeight: 500,
         }}>
-          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: statusColor(p.status) }} />
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: statusColor(p.status), flexShrink: 0 }} />
           {p.status}
         </span>
       </div>
 
-      <div style={{ fontWeight: 700, fontSize: '15px', color: '#e0e2ed', marginBottom: '4px' }}>{p.name}</div>
-      <div style={{ color: '#383c52', fontSize: '12px', fontFamily: 'monospace' }}>{p.slug}</div>
+      <div style={{ fontWeight: 600, fontSize: '14px', color: '#c8ccd8', marginBottom: '4px' }}>{p.name}</div>
+      <div style={{ color: '#252838', fontSize: '11px', fontFamily: 'monospace', letterSpacing: '0.3px' }}>{p.slug}</div>
     </div>
   );
 }
