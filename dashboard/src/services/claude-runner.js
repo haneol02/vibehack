@@ -41,12 +41,34 @@ export const claudeRunner = {
     running.set(slug, true);
     eventBus.publish('chat.start', { username, message: prompt, messageId: userMsgId }, projectId);
 
+    // Build context from recent conversation history (last 10 exchanges)
+    const history = db.prepare(
+      'SELECT role, content, username FROM messages WHERE project_id = ? AND id != ? ORDER BY created_at DESC LIMIT 20'
+    ).all(projectId, userMsgId).reverse();
+
+    let contextPrompt = prompt;
+    if (history.length > 0) {
+      const lines = history.map(m => {
+        if (m.role === 'user') return `[${m.username}]: ${m.content}`;
+        try {
+          const c = JSON.parse(m.content);
+          return `[Claude]: ${c.text || ''}`;
+        } catch {
+          return `[Claude]: ${m.content}`;
+        }
+      }).filter(l => l.trim().length > 10);
+
+      if (lines.length > 0) {
+        contextPrompt = `이전 대화 맥락:\n${lines.join('\n')}\n\n현재 요청: ${prompt}`;
+      }
+    }
+
     let assistantText = '';
     const tools = [];
     const assistantMsgId = uuidv4();
 
     try {
-      for await (const event of query({ prompt, options: { cwd: projectDir, maxTurns: 30 } })) {
+      for await (const event of query({ prompt: contextPrompt, options: { cwd: projectDir, maxTurns: 30 } })) {
         if (event.type === 'assistant') {
           for (const block of (event.message?.content || [])) {
             if (block.type === 'text' && block.text) {
