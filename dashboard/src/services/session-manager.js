@@ -44,6 +44,7 @@ export const sessionManager = {
     const binds = [
       `/projects/${projectSlug}:/workspace/${projectSlug}`,
       `${homeDir}/.claude:/root/.claude`,
+      `/etc/machine-id:/etc/machine-id:ro`,
     ];
 
     const container = await docker.createContainer({
