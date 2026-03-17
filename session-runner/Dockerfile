@@ -18,7 +18,8 @@ RUN wget -q -O /usr/local/bin/ttyd \
     && chmod +x /usr/local/bin/ttyd
 
 # Install Claude Code CLI (native installer)
-RUN curl -fsSL https://claude.ai/install.sh | bash
+RUN curl -fsSL https://claude.ai/install.sh | bash && \
+    find /root -name "claude" -type f -executable 2>/dev/null | head -1 | xargs -I{} ln -sf {} /usr/local/bin/claude
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
