@@ -17,9 +17,8 @@ RUN wget -q -O /usr/local/bin/ttyd \
     "https://github.com/tsl0922/ttyd/releases/download/1.7.3/ttyd.x86_64" \
     && chmod +x /usr/local/bin/ttyd
 
-# Install Claude Code CLI (native installer)
-RUN curl -fsSL https://claude.ai/install.sh | bash && \
-    find /root -name "claude" -type f -executable 2>/dev/null | head -1 | xargs -I{} ln -sf {} /usr/local/bin/claude
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
