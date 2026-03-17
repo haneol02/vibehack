@@ -20,8 +20,11 @@ if [ -n "$ANTHROPIC_API_KEY" ]; then
 fi
 # claude login 방식: ~/.claude가 마운트되어 있으면 자동으로 인증됨
 
-# Start ttyd
+# Start ttyd - each connection gets its own linked session (session group)
+# so multiple users share content but have independent terminal sizes
 exec ttyd \
     --port 7681 \
     --writable \
-    tmux attach-session -t "$SESSION_NAME"
+    -t rendererType=webgl \
+    -t fontSize=14 \
+    bash -c 'LINKED=$(tmux new-session -d -t "$SESSION_NAME" -P -F "#{session_name}") && tmux attach-session -t "$LINKED"; tmux kill-session -t "$LINKED" 2>/dev/null'

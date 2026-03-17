@@ -43,7 +43,7 @@ export const sessionManager = {
     const homeDir = process.env.HOST_HOME || process.env.HOME || '/root';
     const binds = [
       `/projects/${projectSlug}:/workspace/${projectSlug}`,
-      `${homeDir}/.claude:/root/.claude:ro`,
+      `${homeDir}/.claude:/root/.claude`,
     ];
 
     const container = await docker.createContainer({
