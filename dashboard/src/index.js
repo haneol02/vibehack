@@ -55,7 +55,7 @@ server.on('upgrade', (req, socket, head) => {
       const session = db.prepare('SELECT * FROM sessions WHERE project_id = ? AND status = ?').get(project.id, 'running');
       if (session) {
         req.url = url.replace(`/proxy/session/${slug}`, '') || '/';
-        proxy.ws(req, socket, head, { target: `http://localhost:${session.port}` });
+        proxy.ws(req, socket, head, { target: `http://${session.container_name}:7681` });
         return;
       }
     }
