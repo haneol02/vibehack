@@ -3,6 +3,7 @@ import { db } from '../services/db.js';
 import { sessionManager } from '../services/session-manager.js';
 import { appManager } from '../services/app-manager.js';
 import { v4 as uuidv4 } from 'uuid';
+import { rmSync } from 'fs';
 
 const router = Router();
 
@@ -51,10 +52,14 @@ router.delete('/:slug', async (req, res) => {
   if (!project) return res.status(404).json({ error: 'not found' });
 
   try {
-    await sessionManager.stop(project.id, project.slug).catch(() => {});
     await appManager.stop(project.id, project.slug).catch(() => {});
   } catch {}
 
+  try {
+    rmSync(`/projects/${project.slug}`, { recursive: true, force: true });
+  } catch {}
+
+  db.prepare('DELETE FROM messages WHERE project_id = ?').run(project.id);
   db.prepare('DELETE FROM sessions WHERE project_id = ?').run(project.id);
   db.prepare('DELETE FROM apps WHERE project_id = ?').run(project.id);
   db.prepare('DELETE FROM events WHERE project_id = ?').run(project.id);

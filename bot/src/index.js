@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Events, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { Client, GatewayIntentBits, Events } from 'discord.js';
 import { hackCommand } from './commands/hack.js';
 import { logListener } from './log-listener.js';
 
@@ -27,36 +27,53 @@ client.on(Events.MessageCreate, async (message) => {
   const project = projects.find(p => p.discord_channel_id === message.channelId);
   if (!project) return;
 
+  const username = message.member?.displayName || message.author.username;
+  const reply = await message.reply({ content: '⏳ Claude가 처리 중...' });
+
+  // 세션 시작 보장
+  await fetch(`${API_URL}/api/sessions/${project.slug}/start`, { method: 'POST' }).catch(() => {});
+
   // Claude에 메시지 전달
-  const sendRes = await fetch(`${API_URL}/api/sessions/${project.slug}/send`, {
+  const chatRes = await fetch(`${API_URL}/api/sessions/${project.slug}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: message.content }),
+    body: JSON.stringify({ message: message.content, username, source: 'discord' }),
   }).catch(() => null);
 
-  if (!sendRes?.ok) return;
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`log:${project.slug}`)
-      .setLabel('📋 응답 확인')
-      .setStyle(ButtonStyle.Secondary)
-  );
-
-  await message.reply({ content: `✅ Claude에게 전달됨`, components: [row] });
-});
-
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (interaction.isButton() && interaction.customId.startsWith('log:')) {
-    const slug = interaction.customId.split(':')[1];
-    await interaction.deferReply({ ephemeral: true });
-    const res = await fetch(`${API_URL}/api/sessions/${slug}/log`).catch(() => null);
-    const { log } = res ? await res.json() : { log: '(로그 없음)' };
-    const truncated = log?.slice(-1800) || '(로그 없음)';
-    await interaction.editReply(`\`\`\`\n${truncated}\n\`\`\``);
+  if (!chatRes?.ok) {
+    const errBody = chatRes ? await chatRes.json().catch(() => ({})) : {};
+    await reply.edit(`❌ 오류: ${errBody.error || '알 수 없는 오류'}`);
     return;
   }
 
+  // Claude가 완료될 때까지 폴링 (최대 5분)
+  let attempts = 0;
+  const maxAttempts = 60;
+
+  const poll = async () => {
+    await new Promise(r => setTimeout(r, 5000));
+    attempts++;
+
+    const statusRes = await fetch(`${API_URL}/api/sessions/${project.slug}`).catch(() => null);
+    const status = statusRes ? await statusRes.json().catch(() => ({})) : {};
+
+    if (!status.claudeRunning || attempts >= maxAttempts) {
+      const msgRes = await fetch(`${API_URL}/api/sessions/${project.slug}/messages`).catch(() => null);
+      const msgs = msgRes ? await msgRes.json().catch(() => []) : [];
+      const last = [...msgs].reverse().find(m => m.role === 'assistant');
+      const text = last?.content?.text || last?.content || '완료됐습니다.';
+      const truncated = String(text).slice(0, 1900);
+      await reply.edit(`**Claude:** ${truncated}`);
+      return;
+    }
+
+    await poll();
+  };
+
+  await poll();
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName === 'hack') {
     await hackCommand.execute(interaction);

@@ -16,6 +16,7 @@
     "uuid": "^9.0.0",
     "http-proxy": "^1.18.1",
     "express-http-proxy": "^2.0.0",
-    "express-session": "^1.18.0"
+    "express-session": "^1.18.0",
+    "@anthropic-ai/claude-code": "latest"
   }
 }

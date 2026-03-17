@@ -1,53 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
-import LogPanel from './LogPanel.jsx';
+import React, { useState, useEffect } from 'react';
+import Chat from './Chat.jsx';
 
 export default function Session({ slug }) {
-  const [session, setSession] = useState(null);
+  const [project, setProject] = useState(null);
   const [app, setApp] = useState(null);
   const [startCmd, setStartCmd] = useState('npm start');
-  const [ttydReady, setTtydReady] = useState(false);
-  const [connectAttempt, setConnectAttempt] = useState(0);
   const domain = window.location.hostname;
 
   useEffect(() => {
     const load = async () => {
-      const [s, a] = await Promise.all([
-        fetch(`/api/sessions/${slug}`).then(r => r.json()),
+      const [p, a] = await Promise.all([
+        fetch(`/api/projects/${slug}`).then(r => r.json()),
         fetch(`/api/apps/${slug}`).then(r => r.json()),
       ]);
-      setSession(s);
+      setProject(p);
       setApp(a);
+      fetch(`/api/sessions/${slug}/start`, { method: 'POST' }).catch(() => {});
     };
     load();
-    const interval = setInterval(load, 5000);
+    const interval = setInterval(() => {
+      fetch(`/api/apps/${slug}`).then(r => r.json()).then(setApp);
+    }, 5000);
     return () => clearInterval(interval);
   }, [slug]);
-
-  // Reset when session restarts
-  useEffect(() => {
-    if (session?.status !== 'running') {
-      setTtydReady(false);
-      setConnectAttempt(0);
-    }
-  }, [session?.status]);
-
-  // Poll ttyd until it's ready
-  useEffect(() => {
-    if (!session || session.status !== 'running' || ttydReady) return;
-    let cancelled = false;
-    const poll = async () => {
-      try {
-        const res = await fetch(`/proxy/session/${slug}/`, { method: 'HEAD' });
-        if (res.ok && !cancelled) { setTtydReady(true); return; }
-      } catch {}
-      if (!cancelled) {
-        setConnectAttempt(n => n + 1);
-        setTimeout(poll, 2000);
-      }
-    };
-    poll();
-    return () => { cancelled = true; };
-  }, [session?.status, slug]);
 
   const startApp = async () => {
     const res = await fetch(`/api/apps/${slug}/start`, {
@@ -63,93 +38,59 @@ export default function Session({ slug }) {
     setApp({ status: 'stopped' });
   };
 
-  const sessionUrl = `/proxy/session/${slug}/`;
+  const appUrl = `http://${slug}.${domain}`;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px', height: 'calc(100vh - 100px)' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* Terminal */}
-        <div style={{ flex: 1, background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-          {session?.status === 'running' ? (
-            <>
-              {!ttydReady && (
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#8b949e', gap: '12px' }}>
-                  <div style={{ fontSize: '13px' }}>터미널 연결 중...</div>
-                  <div style={{ fontSize: '11px', color: '#484d5a' }}>
-                    {connectAttempt === 0 ? '잠시 기다려주세요' : `재시도 중... (${connectAttempt})`}
-                  </div>
-                </div>
-              )}
-              {ttydReady && (
-                <iframe
-                  src={sessionUrl}
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  title="Claude Code Session"
-                />
-              )}
-            </>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#8b949e' }}>
-              세션 없음 또는 시작 중...
-            </div>
-          )}
-        </div>
-
-        {/* App preview */}
-        {app?.status === 'running' && (
-          <div style={{ height: '300px', background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', overflow: 'hidden' }}>
-            <div style={{ padding: '8px 12px', borderBottom: '1px solid #30363d', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '13px', color: '#8b949e' }}>앱 미리보기</span>
-              <a href={`https://${slug}.${domain}`} target="_blank" rel="noreferrer"
-                style={{ color: '#58a6ff', fontSize: '12px' }}>
-                외부에서 열기 ↗
-              </a>
-            </div>
-            <iframe
-              src={`https://${slug}.${domain}`}
-              style={{ width: '100%', height: 'calc(100% - 37px)', border: 'none' }}
-              title="App Preview"
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Sidebar */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* App control */}
-        <div style={{ background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', padding: '16px' }}>
-          <h3 style={{ marginBottom: '12px', fontSize: '14px', color: '#58a6ff' }}>앱 실행</h3>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: 'calc(100vh - 56px)', overflow: 'hidden' }}>
+      {/* Left: App preview */}
+      <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #14162a' }}>
+        {/* App control bar */}
+        <div style={{ padding: '10px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, background: '#0b0c15' }}>
           <input
             value={startCmd}
             onChange={e => setStartCmd(e.target.value)}
-            style={{
-              width: '100%', background: '#0d1117', border: '1px solid #30363d',
-              color: '#e6edf3', padding: '6px 10px', borderRadius: '4px', fontSize: '13px',
-              marginBottom: '8px'
-            }}
+            style={{ background: '#08090e', border: '1px solid #1a1d2e', borderRadius: '6px', color: '#8892a4', padding: '5px 10px', fontSize: '12px', width: '160px', outline: 'none', fontFamily: 'monospace' }}
           />
           {app?.status === 'running' ? (
-            <div>
-              <div style={{ fontSize: '12px', color: '#3fb950', marginBottom: '8px' }}>
-                ● 실행 중: <a href={`https://${slug}.${domain}`} target="_blank" rel="noreferrer"
-                  style={{ color: '#58a6ff' }}>{slug}.{domain}</a>
-              </div>
+            <>
+              <a href={appUrl} target="_blank" rel="noreferrer" style={{ color: '#3fb950', fontSize: '12px', textDecoration: 'none' }}>
+                ● {slug}.{domain}
+              </a>
               <button onClick={stopApp}
-                style={{ width: '100%', background: '#da3633', border: 'none', color: 'white', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}>
-                ⏹ 앱 중단
-              </button>
-            </div>
+                style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+              >⏹ 중단</button>
+            </>
           ) : (
             <button onClick={startApp}
-              style={{ width: '100%', background: '#238636', border: 'none', color: 'white', padding: '6px', borderRadius: '4px', cursor: 'pointer' }}>
-              ▶ 앱 실행
-            </button>
+              style={{ background: 'none', border: '1px solid #1a2a1a', color: '#3a6b3a', padding: '4px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#3fb950'; e.currentTarget.style.borderColor = '#2a5a2a'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#3a6b3a'; e.currentTarget.style.borderColor = '#1a2a1a'; }}
+            >▶ 앱 실행</button>
           )}
         </div>
 
-        {/* Log panel */}
-        <LogPanel slug={slug} />
+        {/* App iframe */}
+        <div style={{ flex: 1, position: 'relative', background: '#0b0c15' }}>
+          {app?.status === 'running' ? (
+            <iframe
+              src={appUrl}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title="App Preview"
+            />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#252838', gap: '12px' }}>
+              <div style={{ fontSize: '32px' }}>🚀</div>
+              <div style={{ fontSize: '14px', color: '#3e4358' }}>앱이 실행되면 여기서 미리볼 수 있어요</div>
+              <div style={{ fontSize: '11px', color: '#252838' }}>우측 채팅에서 Claude에게 앱 만들기를 요청하세요</div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Right: Chat */}
+      <Chat slug={slug} projectId={project?.id} />
     </div>
   );
 }

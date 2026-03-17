@@ -15,16 +15,6 @@ export default function Dashboard() {
 
   useEffect(() => { loadProjects(); }, []);
 
-  const activateProject = async (slug) => {
-    await fetch(`/api/sessions/${slug}/start`, { method: 'POST' });
-    loadProjects();
-  };
-
-  const deactivateProject = async (slug) => {
-    await fetch(`/api/sessions/${slug}/stop`, { method: 'POST' });
-    loadProjects();
-  };
-
   const deleteProject = async (slug) => {
     if (!confirm(`"${slug}" 프로젝트를 삭제할까요?\n컨테이너와 데이터가 모두 제거됩니다.`)) return;
     await fetch(`/api/projects/${slug}`, { method: 'DELETE' });
@@ -117,8 +107,6 @@ export default function Dashboard() {
                 project={p}
                 onClick={() => navigate(`/project/${p.slug}`)}
                 onDelete={deleteProject}
-                onDeactivate={deactivateProject}
-                onActivate={activateProject}
                 statusColor={statusColor}
                 statusLabel={statusLabel}
               />
@@ -130,7 +118,7 @@ export default function Dashboard() {
   );
 }
 
-function ProjectCard({ project: p, onClick, onDelete, onDeactivate, onActivate, statusColor, statusLabel }) {
+function ProjectCard({ project: p, onClick, onDelete, statusColor, statusLabel }) {
   const [hovered, setHovered] = useState(false);
   const initial = p.name ? p.name[0].toUpperCase() : '?';
 
@@ -165,25 +153,6 @@ function ProjectCard({ project: p, onClick, onDelete, onDeactivate, onActivate, 
       <div style={{ color: '#252838', fontSize: '11px', fontFamily: 'monospace', marginBottom: '12px' }}>{p.slug}</div>
 
       <div style={{ display: 'flex', gap: '6px' }}>
-        {p.session_status === 'running' ? (
-          <button
-            onClick={e => { e.stopPropagation(); onDeactivate(p.slug); }}
-            style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flex: 1, transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#0d0e18'; e.currentTarget.style.color = '#8b949e'; e.currentTarget.style.borderColor = '#2a3050'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#484d5a'; e.currentTarget.style.borderColor = '#1a1d2e'; }}
-          >
-            비활성화
-          </button>
-        ) : (
-          <button
-            onClick={e => { e.stopPropagation(); onActivate(p.slug); }}
-            style={{ background: 'none', border: '1px solid #1a2a1a', color: '#3a6b3a', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flex: 1, transition: 'all 0.15s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#0a180a'; e.currentTarget.style.color = '#3fb950'; e.currentTarget.style.borderColor = '#2a5a2a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#3a6b3a'; e.currentTarget.style.borderColor = '#1a2a1a'; }}
-          >
-            활성화
-          </button>
-        )}
         <button
           onClick={e => { e.stopPropagation(); onDelete(p.slug); }}
           style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flex: 1, transition: 'all 0.15s' }}
