@@ -39,9 +39,6 @@ fi
 if [ -z "$DISCORD_TOKEN" ] || [ "$DISCORD_TOKEN" = "your_discord_bot_token" ]; then
     MISSING="$MISSING\n  - DISCORD_TOKEN"
 fi
-if [ -z "$ANTHROPIC_KEY" ] || [ "$ANTHROPIC_KEY" = "your_anthropic_api_key" ]; then
-    MISSING="$MISSING\n  - ANTHROPIC_API_KEY"
-fi
 
 if [ -n "$MISSING" ]; then
     echo "Error: .env에 다음 값이 설정되지 않았습니다:"

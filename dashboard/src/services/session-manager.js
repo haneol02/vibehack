@@ -31,17 +31,28 @@ export const sessionManager = {
       await existing.remove().catch(() => {});
     } catch {}
 
+    const env = [
+      `SESSION_NAME=${projectSlug}`,
+      `WORKSPACE=/workspace/${projectSlug}`,
+    ];
+    if (anthropicApiKey || process.env.ANTHROPIC_API_KEY) {
+      env.push(`ANTHROPIC_API_KEY=${anthropicApiKey || process.env.ANTHROPIC_API_KEY}`);
+    }
+
+    // ~/.claude 마운트: claude login 인증 정보 공유
+    const homeDir = process.env.HOME || '/root';
+    const binds = [
+      `/projects/${projectSlug}:/workspace/${projectSlug}`,
+      `${homeDir}/.claude:/root/.claude:ro`,
+    ];
+
     const container = await docker.createContainer({
       name: containerName,
       Image: 'vibehack-session-runner',
-      Env: [
-        `ANTHROPIC_API_KEY=${anthropicApiKey || process.env.ANTHROPIC_API_KEY}`,
-        `SESSION_NAME=${projectSlug}`,
-        `WORKSPACE=/workspace/${projectSlug}`,
-      ],
+      Env: env,
       HostConfig: {
         PortBindings: { '7681/tcp': [{ HostPort: String(port) }] },
-        Binds: [`/projects/${projectSlug}:/workspace/${projectSlug}`],
+        Binds: binds,
         NetworkMode: 'vibehack',
       },
       NetworkingConfig: {
