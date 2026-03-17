@@ -1,4 +1,5 @@
-import { query } from '@anthropic-ai/claude-code';
+import { spawn } from 'child_process';
+import { createInterface } from 'readline';
 import { db } from './db.js';
 import { eventBus } from './event-bus.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -68,22 +69,48 @@ export const claudeRunner = {
     const assistantMsgId = uuidv4();
 
     try {
-      for await (const event of query({ prompt: contextPrompt, options: { cwd: projectDir, maxTurns: 30 } })) {
-        if (event.type === 'assistant') {
-          for (const block of (event.message?.content || [])) {
-            if (block.type === 'text' && block.text) {
-              assistantText += block.text;
-              eventBus.publish('chat.delta', { text: block.text }, projectId);
-            } else if (block.type === 'tool_use') {
-              const label = toolLabel(block.name, block.input);
-              tools.push({ name: block.name, label, input: block.input });
-              eventBus.publish('chat.tool', { name: block.name, label }, projectId);
+      await new Promise((resolve, reject) => {
+        const proc = spawn('claude', ['-p', contextPrompt, '--output-format', 'stream-json', '--max-turns', '30'], {
+          cwd: projectDir,
+          env: { ...process.env, HOME: '/root' },
+        });
+
+        const rl = createInterface({ input: proc.stdout });
+
+        rl.on('line', (line) => {
+          if (!line.trim()) return;
+          try {
+            const event = JSON.parse(line);
+            if (event.type === 'assistant') {
+              for (const block of (event.message?.content || [])) {
+                if (block.type === 'text' && block.text) {
+                  assistantText += block.text;
+                  eventBus.publish('chat.delta', { text: block.text }, projectId);
+                } else if (block.type === 'tool_use') {
+                  const label = toolLabel(block.name, block.input);
+                  tools.push({ name: block.name, label, input: block.input });
+                  eventBus.publish('chat.tool', { name: block.name, label }, projectId);
+                }
+              }
+            } else if (event.type === 'result') {
+              if (!assistantText && event.result) assistantText = event.result;
             }
+          } catch {}
+        });
+
+        let stderrData = '';
+        proc.stderr.on('data', (d) => { stderrData += d.toString(); });
+
+        proc.on('close', (code) => {
+          if (code !== 0 && !assistantText) {
+            reject(new Error(stderrData || `claude exited with code ${code}`));
+          } else {
+            resolve();
           }
-        } else if (event.type === 'result' && event.result) {
-          if (!assistantText) assistantText = event.result;
-        }
-      }
+        });
+
+        proc.on('error', reject);
+      });
     } catch (err) {
       const errMsg = `오류: ${err.message}`;
       assistantText = errMsg;
