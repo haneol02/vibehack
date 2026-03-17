@@ -19,6 +19,7 @@ jobs:
           script: |
             cd ~/vibehack
             git pull
-            docker-compose build
-            docker-compose up -d
+            docker build -t vibehack-session-runner ./session-runner
+            docker compose build
+            docker compose up -d
             echo "배포 완료!"
