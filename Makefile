@@ -1,4 +1,4 @@
-.PHONY: build up down logs restart deploy
+.PHONY: build up down logs restart deploy deploy-vps nginx-conf nginx-reload shell-dashboard register-commands
 
 build:
 	docker build -t vibehack-session-runner ./session-runner
@@ -23,10 +23,22 @@ shell-dashboard:
 register-commands:
 	docker-compose exec bot node src/register-commands.js
 
-deploy: build up register-commands
+# Nginx 설정 생성 (.env DOMAIN 기반)
+nginx-conf:
+	bash scripts/gen-nginx-conf.sh
+
+# Nginx 재로드 (설정 변경 후)
+nginx-reload:
+	docker-compose exec nginx nginx -s reload
+
+# 로컬 배포
+deploy: nginx-conf build up register-commands
 	@echo "VibHack deployed!"
 
-ssl-setup:
-	certbot certonly --dns-cloudflare \
-		--dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
-		-d $(DOMAIN) -d "*.$(DOMAIN)"
+# VPS 원클릭 배포
+deploy-vps:
+	sudo bash scripts/deploy-vps.sh
+
+# VPS 서버 초기화 (최초 1회)
+init-server:
+	sudo bash scripts/init-server.sh

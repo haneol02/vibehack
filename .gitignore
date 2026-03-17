@@ -3,7 +3,10 @@ node_modules/
 data/
 projects/
 nginx/conf.d/app-*.conf
+nginx/conf.d/default.conf
+nginx/conf.d/ssl.conf
 *.log
 dist/
 .DS_Store
 .omc/
+haneol.kr.zone

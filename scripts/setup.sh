@@ -7,11 +7,16 @@ echo "=== VibHack Setup ==="
 if [ ! -f .env ]; then
     cp .env.example .env
     echo "Created .env from .env.example - please edit it!"
+    echo "  nano .env"
     exit 1
 fi
 
 # Create required directories
 mkdir -p projects data nginx/conf.d
+
+# Generate nginx config from template
+echo "Generating nginx config..."
+bash scripts/gen-nginx-conf.sh
 
 # Build images
 echo "Building Docker images..."
@@ -31,7 +36,7 @@ docker-compose up -d bot nginx
 
 echo ""
 echo "=== VibHack is running! ==="
-echo "Dashboard: http://$(grep DOMAIN .env | cut -d= -f2)"
+echo "Dashboard: http://$(grep '^DOMAIN=' .env | cut -d= -f2 | tr -d ' \r')"
 echo ""
 echo "To register Discord slash commands:"
 echo "  make register-commands"
