@@ -94,7 +94,7 @@ export const hackCommand = {
           const embed = new EmbedBuilder()
             .setColor(0x00AE86)
             .setTitle('📋 VibHack 프로젝트 목록')
-            .setDescription(projects.map(p => `**${p.name}** (\`${p.slug}\`) - ${p.status}`).join('\n'));
+            .setDescription(projects.map(p => `**${p.name}** (\`${p.slug}\`) - ${p.session_status === 'running' ? '🟢 실행 중' : '⚫ 중단됨'}`).join('\n'));
 
           await interaction.editReply({ embeds: [embed] });
           break;
