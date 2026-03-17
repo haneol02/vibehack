@@ -22,4 +22,5 @@ jobs:
             docker build -t vibehack-session-runner ./session-runner
             docker compose build
             docker compose up -d
+            docker compose exec -T bot node src/register-commands.js
             echo "배포 완료!"
