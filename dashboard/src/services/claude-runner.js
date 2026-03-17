@@ -41,9 +41,9 @@ export const claudeRunner = {
     running.set(slug, true);
     eventBus.publish('chat.start', { username, message: prompt, messageId: userMsgId }, projectId);
 
-    // Build context from recent conversation history (last 10 exchanges)
+    // Build context from recent conversation history (last 5 exchanges)
     const history = db.prepare(
-      'SELECT role, content, username FROM messages WHERE project_id = ? AND id != ? ORDER BY created_at DESC LIMIT 20'
+      'SELECT role, content, username FROM messages WHERE project_id = ? AND id != ? ORDER BY created_at DESC LIMIT 10'
     ).all(projectId, userMsgId).reverse();
 
     let contextPrompt = prompt;
