@@ -3,11 +3,15 @@ import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'disc
 
 const API_URL = process.env.DASHBOARD_API_URL || 'http://dashboard:3001';
 const DOMAIN = process.env.DOMAIN || 'localhost';
+const proto = 'https';
 
 async function api(path, method = 'GET', body = null) {
   const res = await fetch(`${API_URL}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.API_KEY || '',
+    },
     body: body ? JSON.stringify(body) : null,
   });
   return res.json();

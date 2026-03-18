@@ -48,6 +48,8 @@ app.get('/api/auth/me', (req, res) => {
 
 const requireAuth = (req, res, next) => {
   if (req.session.authenticated) return next();
+  const apiKey = process.env.API_KEY;
+  if (apiKey && req.headers['x-api-key'] === apiKey) return next();
   res.status(401).json({ error: 'Unauthorized' });
 };
 

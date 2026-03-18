@@ -3,6 +3,10 @@ import { hackCommand } from './commands/hack.js';
 import { logListener } from './log-listener.js';
 
 const API_URL = process.env.DASHBOARD_API_URL || 'http://dashboard:3001';
+const API_HEADERS = {
+  'Content-Type': 'application/json',
+  'x-api-key': process.env.API_KEY || '',
+};
 
 const client = new Client({
   intents: [
@@ -21,7 +25,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
   // 이 채널에 연결된 프로젝트 찾기
-  const res = await fetch(`${API_URL}/api/projects`).catch(() => null);
+  const res = await fetch(`${API_URL}/api/projects`, { headers: API_HEADERS }).catch(() => null);
   if (!res) return;
   const projects = await res.json().catch(() => []);
   const project = projects.find(p => p.discord_channel_id === message.channelId);
@@ -31,12 +35,12 @@ client.on(Events.MessageCreate, async (message) => {
   const reply = await message.reply({ content: '⏳ Claude가 처리 중...' });
 
   // 세션 시작 보장
-  await fetch(`${API_URL}/api/sessions/${project.slug}/start`, { method: 'POST' }).catch(() => {});
+  await fetch(`${API_URL}/api/sessions/${project.slug}/start`, { method: 'POST', headers: API_HEADERS }).catch(() => {});
 
   // Claude에 메시지 전달
   const chatRes = await fetch(`${API_URL}/api/sessions/${project.slug}/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: API_HEADERS,
     body: JSON.stringify({ message: message.content, username, source: 'discord' }),
   }).catch(() => null);
 
@@ -54,11 +58,11 @@ client.on(Events.MessageCreate, async (message) => {
     await new Promise(r => setTimeout(r, 5000));
     attempts++;
 
-    const statusRes = await fetch(`${API_URL}/api/sessions/${project.slug}`).catch(() => null);
+    const statusRes = await fetch(`${API_URL}/api/sessions/${project.slug}`, { headers: API_HEADERS }).catch(() => null);
     const status = statusRes ? await statusRes.json().catch(() => ({})) : {};
 
     if (!status.claudeRunning || attempts >= maxAttempts) {
-      const msgRes = await fetch(`${API_URL}/api/sessions/${project.slug}/messages`).catch(() => null);
+      const msgRes = await fetch(`${API_URL}/api/sessions/${project.slug}/messages`, { headers: API_HEADERS }).catch(() => null);
       const msgs = msgRes ? await msgRes.json().catch(() => []) : [];
       const last = [...msgs].reverse().find(m => m.role === 'assistant');
       const text = last?.content?.text || last?.content || '완료됐습니다.';
