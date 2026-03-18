@@ -57,8 +57,8 @@ export const appManager = {
         const pkg = JSON.parse(readFileSync(join(projectRoot, 'package.json'), 'utf8'));
         const scripts = pkg.scripts || {};
         if (!scripts.start) {
-          if (scripts.dev) startCommand = 'npm run dev -- --port $PORT --strictPort --host';
-          else if (scripts.preview) startCommand = 'npm run preview -- --port $PORT --strictPort --host';
+          if (scripts.dev) startCommand = 'npm run dev -- --port $PORT --strictPort --host --allowed-hosts all';
+          else if (scripts.preview) startCommand = 'npm run preview -- --port $PORT --strictPort --host --allowed-hosts all';
         }
       } catch {}
     }
