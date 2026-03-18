@@ -94,6 +94,8 @@ export default function Chat({ slug, projectId }) {
   const [isRunning, setIsRunning] = useState(false);
   const [streamText, setStreamText] = useState('');
   const [streamTools, setStreamTools] = useState([]);
+  const streamBufferRef = useRef('');
+  const streamToolsRef = useRef([]);
   const [editingName, setEditingName] = useState(!localStorage.getItem('vibehack-username'));
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -120,17 +122,41 @@ export default function Chat({ slug, projectId }) {
           setIsRunning(true);
           setStreamText('');
           setStreamTools([]);
+          streamBufferRef.current = '';
+          streamToolsRef.current = [];
         } else if (event.type === 'chat.delta') {
-          setStreamText(prev => prev + (event.data?.text || ''));
+          const newText = event.data?.text || '';
+          streamBufferRef.current += newText;
+          let i = 0;
+          const interval = setInterval(() => {
+            if (i >= newText.length) { clearInterval(interval); return; }
+            setStreamText(prev => prev + newText[i++]);
+          }, 8);
         } else if (event.type === 'chat.tool') {
-          setStreamTools(prev => [...prev, event.data]);
-        } else if (event.type === 'chat.done' || event.type === 'chat.error') {
+          streamToolsRef.current = [...streamToolsRef.current, event.data];
+          setStreamTools(streamToolsRef.current);
+        } else if (event.type === 'chat.done') {
+          const finalText = event.data?.text || streamBufferRef.current;
+          const finalTools = streamToolsRef.current;
+          // Small delay to let character animation finish
+          setTimeout(() => {
+            setIsRunning(false);
+            setStreamText('');
+            setStreamTools([]);
+            if (finalText) {
+              setMessages(prev => [...prev, {
+                id: event.data?.messageId || `msg-${Date.now()}`,
+                role: 'assistant',
+                content: { text: finalText, tools: finalTools },
+                username: 'Claude',
+                source: 'system',
+              }]);
+            }
+          }, 200);
+        } else if (event.type === 'chat.error') {
           setIsRunning(false);
           setStreamText('');
           setStreamTools([]);
-          fetch(`/api/sessions/${slug}/messages`).then(r => r.json()).then(data => {
-            setMessages(Array.isArray(data) ? data : []);
-          });
         }
       } catch {}
     };
