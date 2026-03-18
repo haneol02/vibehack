@@ -73,7 +73,9 @@ export const claudeRunner = {
         const proc = spawn('claude', ['-p', contextPrompt, '--output-format', 'stream-json', '--verbose', '--max-turns', '30'], {
           cwd: projectDir,
           env: { ...process.env, HOME: '/root' },
+          stdio: ['ignore', 'pipe', 'pipe'],
         });
+        console.log('[claude-runner] spawned claude for slug:', slug);
 
         const rl = createInterface({ input: proc.stdout });
 
@@ -102,6 +104,7 @@ export const claudeRunner = {
         proc.stderr.on('data', (d) => { stderrData += d.toString(); });
 
         proc.on('close', (code) => {
+          console.log('[claude-runner] claude exited code:', code, 'stderr:', stderrData.slice(0, 200));
           if (code !== 0 && !assistantText) {
             reject(new Error(stderrData || `claude exited with code ${code}`));
           } else {
