@@ -1,7 +1,23 @@
 import { spawn } from 'child_process';
+import { existsSync, readdirSync } from 'fs';
+import { join } from 'path';
 import { db } from './db.js';
 import { eventBus } from './event-bus.js';
 import { v4 as uuidv4 } from 'uuid';
+
+function findProjectRoot(dir) {
+  // If package.json exists at root, use root
+  if (existsSync(join(dir, 'package.json'))) return dir;
+  // Otherwise check one level deep
+  try {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory() && existsSync(join(dir, entry.name, 'package.json'))) {
+        return join(dir, entry.name);
+      }
+    }
+  } catch {}
+  return dir;
+}
 
 const APP_BASE_PORT = 8100;
 const MAX_APPS = 20;
@@ -33,8 +49,9 @@ export const appManager = {
       db.prepare('UPDATE apps SET status = ? WHERE id = ?').run('stopped', existing.id);
     }
 
+    const projectRoot = findProjectRoot(`/projects/${projectSlug}`);
     const proc = spawn('/bin/sh', ['-c', startCommand], {
-      cwd: `/projects/${projectSlug}`,
+      cwd: projectRoot,
       env: { ...process.env, PORT: String(port) },
       detached: false,
     });
