@@ -50,8 +50,9 @@ export const appManager = {
     const appId = uuidv4();
     const subdomain = projectSlug;
 
+    db.prepare('DELETE FROM apps WHERE subdomain = ?').run(subdomain);
     db.prepare(`
-      INSERT OR REPLACE INTO apps (id, project_id, container_id, container_name, port, app_port, subdomain, status, start_command)
+      INSERT INTO apps (id, project_id, container_id, container_name, port, app_port, subdomain, status, start_command)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?)
     `).run(appId, projectId, String(proc.pid), `app-${projectSlug}`, port, port, subdomain, startCommand);
 
