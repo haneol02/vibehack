@@ -14,6 +14,7 @@ router.post('/:slug/start', async (req, res) => {
     const result = await appManager.start(project.id, project.slug, startCommand, appPort);
     res.json(result);
   } catch (err) {
+    console.error('[apps] start error:', err);
     res.status(500).json({ error: err.message });
   }
 });
