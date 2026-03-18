@@ -63,3 +63,6 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 `);
+
+// Migrations
+try { db.exec('ALTER TABLE apps ADD COLUMN app_port INTEGER DEFAULT 3000'); } catch {}
