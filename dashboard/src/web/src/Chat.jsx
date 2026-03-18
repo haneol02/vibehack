@@ -1,4 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+function MarkdownContent({ children }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        code({ node, inline, className, children, ...props }) {
+          const match = /language-(\w+)/.exec(className || '');
+          return !inline && match ? (
+            <SyntaxHighlighter
+              style={vscDarkPlus}
+              language={match[1]}
+              PreTag="div"
+              customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px' }}
+              {...props}
+            >
+              {String(children).replace(/\n$/, '')}
+            </SyntaxHighlighter>
+          ) : (
+            <code style={{ background: '#1a1d2e', padding: '1px 5px', borderRadius: '3px', fontSize: '12px', fontFamily: 'monospace' }} {...props}>
+              {children}
+            </code>
+          );
+        },
+        p({ children }) { return <p style={{ margin: '4px 0' }}>{children}</p>; },
+        ul({ children }) { return <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>{children}</ul>; },
+        ol({ children }) { return <ol style={{ margin: '4px 0', paddingLeft: '20px' }}>{children}</ol>; },
+        li({ children }) { return <li style={{ margin: '2px 0' }}>{children}</li>; },
+        h1({ children }) { return <h1 style={{ fontSize: '16px', margin: '8px 0 4px', fontWeight: 700 }}>{children}</h1>; },
+        h2({ children }) { return <h2 style={{ fontSize: '14px', margin: '8px 0 4px', fontWeight: 700 }}>{children}</h2>; },
+        h3({ children }) { return <h3 style={{ fontSize: '13px', margin: '6px 0 4px', fontWeight: 700 }}>{children}</h3>; },
+        blockquote({ children }) {
+          return <blockquote style={{ borderLeft: '3px solid #2a3a6a', margin: '4px 0', paddingLeft: '10px', color: '#8892a4' }}>{children}</blockquote>;
+        },
+        a({ href, children }) {
+          return <a href={href} target="_blank" rel="noreferrer" style={{ color: '#5b8af5', textDecoration: 'underline' }}>{children}</a>;
+        },
+        hr() { return <hr style={{ border: 'none', borderTop: '1px solid #1a1d2e', margin: '8px 0' }} />; },
+      }}
+    >
+      {children}
+    </ReactMarkdown>
+  );
+}
 
 function SourceIcon({ source }) {
   if (source === 'discord') {
@@ -55,10 +103,9 @@ function Message({ msg }) {
           fontSize: '13px',
           lineHeight: 1.6,
           color: isUser ? '#c8d8f8' : '#c8ccd8',
-          whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
         }}>
-          {content}
+          {isUser ? <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span> : <MarkdownContent>{content}</MarkdownContent>}
         </div>
       )}
     </div>
@@ -118,9 +165,9 @@ function StreamingMessage({ text, tools }) {
           background: '#0d0e18', border: '1px solid #14162a',
           borderRadius: '12px 12px 12px 4px', padding: '10px 14px',
           maxWidth: '90%', fontSize: '13px', lineHeight: 1.6,
-          color: '#c8ccd8', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+          color: '#c8ccd8', wordBreak: 'break-word',
         }}>
-          {text}<span style={{ opacity: 0.5 }}>▊</span>
+          <MarkdownContent>{text}</MarkdownContent><span style={{ opacity: 0.5 }}>▊</span>
         </div>
       ) : !latestTool && (
         <div style={{ color: '#484d5a', fontSize: '12px' }}>생각 중...</div>
