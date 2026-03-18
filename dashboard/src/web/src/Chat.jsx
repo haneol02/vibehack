@@ -172,6 +172,25 @@ export default function Chat({ slug, projectId }) {
       .catch(() => {});
   }, [slug]);
 
+  // Poll running state every 3s to catch externally-triggered runs (e.g. Discord /hack ask)
+  // that may have fired chat.start before SSE was connected or during a reconnect gap
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`/api/sessions/${slug}`)
+        .then(r => r.json())
+        .then(data => {
+          const serverRunning = !!data.claudeRunning;
+          setIsRunning(prev => {
+            // Only sync if state diverged (avoid unnecessary re-renders)
+            if (prev !== serverRunning) return serverRunning;
+            return prev;
+          });
+        })
+        .catch(() => {});
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [slug]);
+
   useEffect(() => { userScrolledUpRef.current = false; scrollToBottom(true); }, [slug]);
   useEffect(() => { scrollToBottom(); }, [messages, streamText]);
 

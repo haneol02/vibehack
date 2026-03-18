@@ -198,7 +198,7 @@ export const hackCommand = {
           const message = interaction.options.getString('message');
 
           // Use async chat + polling to avoid socket hang up on long tasks
-          const chatRes = await api(`/api/sessions/${slug}/chat`, 'POST', { message, username: interaction.user.tag });
+          const chatRes = await api(`/api/sessions/${slug}/chat`, 'POST', { message, username: interaction.user.tag, source: 'discord' });
           if (chatRes.error) {
             return interaction.editReply(`❌ ${chatRes.error}`);
           }
@@ -214,7 +214,10 @@ export const hackCommand = {
             if (!status.claudeRunning) break;
           }
 
-          const msgs = await api(`/api/sessions/${slug}/messages`).catch(() => []);
+          const [msgs, app] = await Promise.all([
+            api(`/api/sessions/${slug}/messages`).catch(() => []),
+            api(`/api/apps/${slug}`).catch(() => ({})),
+          ]);
           const last = Array.isArray(msgs) ? [...msgs].reverse().find(m => m.role === 'assistant') : null;
           const replyText = last?.content?.text || last?.content || '완료됐습니다.';
           const truncated = String(replyText).length > 1800 ? String(replyText).slice(0, 1800) + '…' : String(replyText);
@@ -224,7 +227,8 @@ export const hackCommand = {
             .setTitle(`💬 Claude @ ${slug}`)
             .setDescription(truncated);
 
-          await interaction.editReply({ embeds: [embed], components: [projectButtons(slug)] });
+          const buttons = app?.status === 'running' ? appButtons(slug) : projectButtons(slug);
+          await interaction.editReply({ embeds: [embed], components: [buttons] });
           break;
         }
 

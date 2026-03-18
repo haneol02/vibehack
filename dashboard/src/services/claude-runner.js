@@ -40,7 +40,7 @@ export const claudeRunner = {
       .run(userMsgId, projectId, 'user', prompt, username, source);
 
     running.set(slug, true);
-    eventBus.publish('chat.start', { username, message: prompt, messageId: userMsgId }, projectId);
+    eventBus.publish('chat.start', { username, message: prompt, messageId: userMsgId, source }, projectId);
 
     // Build context from recent conversation history (last 5 exchanges)
     const history = db.prepare(
