@@ -45,7 +45,7 @@ export default function Session({ slug }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: '100%', overflow: 'hidden' }}>
       {/* Left: App preview */}
-      <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #14162a' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', borderRight: '1px solid #14162a' }}>
         {/* App control bar */}
         <div style={{ padding: '10px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, background: '#0b0c15' }}>
           <input

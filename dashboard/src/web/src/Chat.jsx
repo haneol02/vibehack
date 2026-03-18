@@ -212,7 +212,8 @@ export default function Chat({ slug, projectId }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#08090e' }}>
+    <div style={{ position: 'relative', height: '100%' }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: '#08090e' }}>
       {/* Header */}
       <div style={{ padding: '12px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <span style={{ fontSize: '12px', color: '#484d5a', fontWeight: 600 }}>채팅</span>
@@ -282,6 +283,7 @@ export default function Chat({ slug, projectId }) {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 }
