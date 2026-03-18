@@ -1,9 +1,18 @@
 # Auto-generated from default.conf.template — do not edit default.conf directly
 # DOMAIN = vibehack.haneol.kr (from .env)
 
+ssl_certificate     /etc/nginx/certs/vibehack.pem;
+ssl_certificate_key /etc/nginx/certs/vibehack.key;
+
+# HTTP → HTTPS redirect (all)
+server {
+    listen 80 default_server;
+    return 301 https://$host$request_uri;
+}
+
 # 메인: 대시보드 + API
 server {
-    listen 80;
+    listen 443 ssl;
     server_name {{DOMAIN}};
 
     location / {
@@ -21,7 +30,7 @@ server {
 
 # VS Code: vscode-vibehack.haneol.kr
 server {
-    listen 80;
+    listen 443 ssl;
     server_name vscode-vibehack.haneol.kr;
 
     location / {
@@ -38,7 +47,7 @@ server {
 
 # 앱 프리뷰: {slug}.{{DOMAIN}}
 server {
-    listen 80;
+    listen 443 ssl;
     server_name ~^(?<slug>.+)\.{{DOMAIN}}$;
 
     location / {
