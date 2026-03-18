@@ -56,7 +56,7 @@ app.use('/api/projects', requireAuth, projectsRouter);
 app.use('/api/sessions', requireAuth, sessionsRouter);
 app.use('/api/apps', requireAuth, appsRouter);
 app.use('/api/events', requireAuth, eventsRouter);
-app.use('/proxy', requireAuth, proxyRouter);
+app.use('/proxy', proxyRouter);
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
