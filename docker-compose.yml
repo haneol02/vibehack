@@ -16,6 +16,7 @@ services:
       - ./projects:/projects
       - ./data:/data
       - ${HOST_HOME}/.claude:/root/.claude
+      - ${HOST_HOME}/.claude.json:/root/.claude.json
       - /etc/machine-id:/etc/machine-id:ro
     networks:
       - vibehack

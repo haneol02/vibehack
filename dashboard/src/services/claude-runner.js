@@ -70,7 +70,7 @@ export const claudeRunner = {
 
     try {
       await new Promise((resolve, reject) => {
-        const proc = spawn('claude', ['-p', contextPrompt, '--output-format', 'stream-json', '--verbose', '--max-turns', '30', '--dangerously-skip-permissions'], {
+        const proc = spawn('claude', ['-p', contextPrompt, '--output-format', 'stream-json', '--verbose', '--max-turns', '30', '--allowedTools', 'Bash,Write,Edit,MultiEdit,Read,Glob,Grep,LS,TodoWrite,TodoRead,WebFetch,WebSearch'], {
           cwd: projectDir,
           env: { ...process.env, HOME: '/root' },
           stdio: ['ignore', 'pipe', 'pipe'],
