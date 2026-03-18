@@ -25,6 +25,9 @@ const MAX_APPS = 20;
 // pid → child process reference
 const processes = new Map();
 
+// On startup, reset any stale 'running' apps (orphaned from previous process)
+db.prepare("UPDATE apps SET status = 'stopped' WHERE status = 'running'").run();
+
 function getNextAppPort(usedPorts) {
   for (let p = APP_BASE_PORT; p < APP_BASE_PORT + MAX_APPS; p++) {
     if (!usedPorts.includes(p)) return p;
