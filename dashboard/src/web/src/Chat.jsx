@@ -15,7 +15,7 @@ function ToolBlock({ tool }) {
   );
 }
 
-function Message({ msg, isStreaming }) {
+function Message({ msg }) {
   const isUser = msg.role === 'user';
   const content = isUser ? msg.content : (msg.content?.text || msg.content || '');
   const tools = isUser ? [] : (msg.content?.tools || []);
@@ -59,7 +59,6 @@ function Message({ msg, isStreaming }) {
           wordBreak: 'break-word',
         }}>
           {content}
-          {isStreaming && <span style={{ opacity: 0.5 }}>▊</span>}
         </div>
       )}
     </div>
@@ -67,20 +66,63 @@ function Message({ msg, isStreaming }) {
 }
 
 function StreamingMessage({ text, tools }) {
+  const [pulse, setPulse] = useState(true);
+  useEffect(() => {
+    const t = setInterval(() => setPulse(p => !p), 600);
+    return () => clearInterval(t);
+  }, []);
+
+  const latestTool = tools.length > 0 ? tools[tools.length - 1] : null;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '12px' }}>
-      <div style={{ fontSize: '11px', color: '#484d5a', marginBottom: '4px' }}>Claude</div>
-      {tools.length > 0 && (
-        <div style={{ background: '#0c0d15', border: '1px solid #1a1d2e', borderRadius: '6px', padding: '8px 12px', marginBottom: '6px', width: '100%' }}>
-          {tools.map((t, i) => <ToolBlock key={i} tool={t} />)}
+      {/* Status bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+        <div style={{
+          width: '7px', height: '7px', borderRadius: '50%',
+          background: '#5b8af5',
+          opacity: pulse ? 1 : 0.3,
+          transition: 'opacity 0.3s',
+          flexShrink: 0,
+        }} />
+        <span style={{ fontSize: '11px', color: '#5b8af5', fontWeight: 600 }}>Claude 작업 중</span>
+        {tools.length > 0 && (
+          <span style={{ fontSize: '11px', color: '#484d5a' }}>· {tools.length}개 작업</span>
+        )}
+      </div>
+
+      {/* Current tool */}
+      {latestTool && (
+        <div style={{
+          background: '#0c0d15',
+          border: '1px solid #1e2240',
+          borderRadius: '6px',
+          padding: '6px 12px',
+          marginBottom: '6px',
+          width: '100%',
+          fontSize: '11px',
+          color: '#6b7aaa',
+          fontFamily: 'monospace',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+        }}>
+          <span style={{ opacity: pulse ? 1 : 0.5, transition: 'opacity 0.3s' }}>⚙</span>
+          {latestTool.label}
         </div>
       )}
-      {text && (
-        <div style={{ background: '#0d0e18', border: '1px solid #14162a', borderRadius: '12px 12px 12px 4px', padding: '10px 14px', maxWidth: '90%', fontSize: '13px', lineHeight: 1.6, color: '#c8ccd8', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+
+      {/* Streaming text */}
+      {text ? (
+        <div style={{
+          background: '#0d0e18', border: '1px solid #14162a',
+          borderRadius: '12px 12px 12px 4px', padding: '10px 14px',
+          maxWidth: '90%', fontSize: '13px', lineHeight: 1.6,
+          color: '#c8ccd8', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+        }}>
           {text}<span style={{ opacity: 0.5 }}>▊</span>
         </div>
-      )}
-      {!text && tools.length === 0 && (
+      ) : !latestTool && (
         <div style={{ color: '#484d5a', fontSize: '12px' }}>생각 중...</div>
       )}
     </div>
@@ -96,23 +138,28 @@ export default function Chat({ slug, projectId }) {
   const [streamTools, setStreamTools] = useState([]);
   const streamBufferRef = useRef('');
   const streamToolsRef = useRef([]);
+  const userScrolledUpRef = useRef(false);
   const [editingName, setEditingName] = useState(!localStorage.getItem('vibehack-username'));
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-
   const messagesContainerRef = useRef(null);
 
-  const isAtBottom = () => {
-    const el = messagesContainerRef.current;
-    if (!el) return true;
-    return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-  };
-
   const scrollToBottom = (force = false) => {
-    if (force || isAtBottom()) {
+    if (force || !userScrolledUpRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Track user scroll intent
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      userScrolledUpRef.current = el.scrollHeight - el.scrollTop - el.clientHeight > 80;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     fetch(`/api/sessions/${slug}/messages`)
@@ -125,7 +172,7 @@ export default function Chat({ slug, projectId }) {
       .catch(() => {});
   }, [slug]);
 
-  useEffect(() => { scrollToBottom(true); }, [slug]);
+  useEffect(() => { userScrolledUpRef.current = false; scrollToBottom(true); }, [slug]);
   useEffect(() => { scrollToBottom(); }, [messages, streamText]);
 
   useEffect(() => {
@@ -140,6 +187,8 @@ export default function Chat({ slug, projectId }) {
           setStreamTools([]);
           streamBufferRef.current = '';
           streamToolsRef.current = [];
+          userScrolledUpRef.current = false; // reset scroll lock on new message
+          scrollToBottom(true);
         } else if (event.type === 'chat.delta') {
           const newText = event.data?.text || '';
           streamBufferRef.current += newText;
@@ -154,7 +203,6 @@ export default function Chat({ slug, projectId }) {
         } else if (event.type === 'chat.done') {
           const finalText = event.data?.text || streamBufferRef.current;
           const finalTools = streamToolsRef.current;
-          // Small delay to let character animation finish
           setTimeout(() => {
             setIsRunning(false);
             setStreamText('');
@@ -195,7 +243,6 @@ export default function Chat({ slug, projectId }) {
     if (!msg || isRunning) return;
     setInput('');
 
-    // Optimistic user message
     setMessages(prev => [...prev, {
       id: `tmp-${Date.now()}`,
       role: 'user',
@@ -221,7 +268,14 @@ export default function Chat({ slug, projectId }) {
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: '#08090e' }}>
       {/* Header */}
       <div style={{ padding: '12px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <span style={{ fontSize: '12px', color: '#484d5a', fontWeight: 600 }}>채팅</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '12px', color: '#484d5a', fontWeight: 600 }}>채팅</span>
+          {isRunning && (
+            <span style={{ fontSize: '10px', background: '#1a2040', color: '#5b8af5', borderRadius: '4px', padding: '2px 6px' }}>
+              작업 중
+            </span>
+          )}
+        </div>
         {editingName ? (
           <form onSubmit={e => { e.preventDefault(); saveUsername(username); }} style={{ display: 'flex', gap: '6px' }}>
             <input
@@ -255,7 +309,7 @@ export default function Chat({ slug, projectId }) {
 
       {/* Input */}
       <div style={{ padding: '12px 16px', borderTop: '1px solid #14162a', flexShrink: 0 }}>
-        <div style={{ display: 'flex', gap: '8px', background: '#0c0d15', border: '1px solid #1a1d2e', borderRadius: '10px', padding: '8px 12px' }}>
+        <div style={{ display: 'flex', gap: '8px', background: '#0c0d15', border: `1px solid ${isRunning ? '#1e2240' : '#1a1d2e'}`, borderRadius: '10px', padding: '8px 12px', transition: 'border-color 0.2s' }}>
           <textarea
             ref={inputRef}
             value={input}
