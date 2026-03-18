@@ -24,6 +24,7 @@ jobs:
             docker compose build
             docker compose rm -f dashboard bot 2>/dev/null || true
             docker compose up -d --remove-orphans
+            docker compose exec -T nginx nginx -s reload || docker compose restart nginx
             sleep 3
             docker compose exec -T bot node src/register-commands.js || true
             echo "배포 완료!"
