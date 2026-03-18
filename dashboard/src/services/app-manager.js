@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { db } from './db.js';
 import { eventBus } from './event-bus.js';
@@ -50,6 +50,19 @@ export const appManager = {
     }
 
     const projectRoot = findProjectRoot(`/projects/${projectSlug}`);
+
+    // Auto-detect start command if using default 'npm start' but project lacks it
+    if (startCommand === 'npm start') {
+      try {
+        const pkg = JSON.parse(readFileSync(join(projectRoot, 'package.json'), 'utf8'));
+        const scripts = pkg.scripts || {};
+        if (!scripts.start) {
+          if (scripts.dev) startCommand = 'npm run dev -- --port $PORT';
+          else if (scripts.preview) startCommand = 'npm run preview -- --port $PORT';
+        }
+      } catch {}
+    }
+
     const proc = spawn('/bin/sh', ['-c', startCommand], {
       cwd: projectRoot,
       env: { ...process.env, PORT: String(port) },
