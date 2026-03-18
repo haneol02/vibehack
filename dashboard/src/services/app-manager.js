@@ -1,12 +1,13 @@
-import Docker from 'dockerode';
+import { spawn } from 'child_process';
 import { db } from './db.js';
 import { eventBus } from './event-bus.js';
 import { v4 as uuidv4 } from 'uuid';
 
-const docker = new Docker({ socketPath: '/var/run/docker.sock' });
-
 const APP_BASE_PORT = 8100;
 const MAX_APPS = 20;
+
+// pid → child process reference
+const processes = new Map();
 
 function getNextAppPort(usedPorts) {
   for (let p = APP_BASE_PORT; p < APP_BASE_PORT + MAX_APPS; p++) {
@@ -15,58 +16,51 @@ function getNextAppPort(usedPorts) {
   throw new Error('No available app ports');
 }
 
-
 export const appManager = {
   async start(projectId, projectSlug, startCommand = 'npm start', appPort = 3000) {
     const apps = db.prepare('SELECT port FROM apps WHERE status = ?').all('running');
     const usedPorts = apps.map(a => a.port);
-    const hostPort = getNextAppPort(usedPorts);
+    const port = getNextAppPort(usedPorts);
+
+    // Kill existing process for this slug if any
+    const existing = db.prepare('SELECT * FROM apps WHERE project_id = ? AND status = ?').get(projectId, 'running');
+    if (existing) {
+      try {
+        const proc = processes.get(Number(existing.container_id));
+        if (proc) proc.kill();
+        processes.delete(Number(existing.container_id));
+      } catch {}
+      db.prepare('UPDATE apps SET status = ? WHERE id = ?').run('stopped', existing.id);
+    }
+
+    const proc = spawn('/bin/sh', ['-c', startCommand], {
+      cwd: `/projects/${projectSlug}`,
+      env: { ...process.env, PORT: String(port) },
+      detached: false,
+    });
+
+    processes.set(proc.pid, proc);
+
+    proc.on('exit', () => {
+      processes.delete(proc.pid);
+      db.prepare('UPDATE apps SET status = ? WHERE container_id = ?').run('stopped', String(proc.pid));
+      eventBus.publish('app.stopped', { projectSlug }, projectId);
+    });
 
     const appId = uuidv4();
-    const containerName = `vibehack-app-${projectSlug}`;
     const subdomain = projectSlug;
-
-    // Remove existing
-    try {
-      const existing = docker.getContainer(containerName);
-      await existing.stop().catch(() => {});
-      await existing.remove().catch(() => {});
-    } catch {}
-
-    // Pull image if not present
-    const IMAGE = 'node:20-alpine';
-    await new Promise((resolve, reject) => {
-      docker.pull(IMAGE, (err, stream) => {
-        if (err) return reject(err);
-        docker.modem.followProgress(stream, (err) => err ? reject(err) : resolve());
-      });
-    });
-
-    const container = await docker.createContainer({
-      name: containerName,
-      Image: IMAGE,
-      Cmd: ['/bin/sh', '-c', `cd /app && ${startCommand}`],
-      Env: [`PORT=${appPort}`],
-      HostConfig: {
-        PortBindings: { [`${appPort}/tcp`]: [{ HostPort: String(hostPort) }] },
-        Binds: [`/projects/${projectSlug}:/app`],
-        NetworkMode: 'vibehack',
-      },
-    });
-
-    await container.start();
 
     db.prepare(`
       INSERT OR REPLACE INTO apps (id, project_id, container_id, container_name, port, app_port, subdomain, status, start_command)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?)
-    `).run(appId, projectId, container.id, containerName, hostPort, appPort, subdomain, startCommand);
+    `).run(appId, projectId, String(proc.pid), `app-${projectSlug}`, port, port, subdomain, startCommand);
 
     const domain = process.env.DOMAIN || 'localhost';
     const url = `https://${subdomain}.${domain}`;
 
-    eventBus.publish('app.started', { projectSlug, subdomain, url, port: hostPort }, projectId);
+    eventBus.publish('app.started', { projectSlug, subdomain, url, port }, projectId);
 
-    return { appId, hostPort, subdomain, url };
+    return { appId, port, subdomain, url };
   },
 
   async stop(projectId, projectSlug) {
@@ -74,9 +68,9 @@ export const appManager = {
     if (!app) return null;
 
     try {
-      const container = docker.getContainer(app.container_name);
-      await container.stop();
-      await container.remove();
+      const proc = processes.get(Number(app.container_id));
+      if (proc) proc.kill();
+      processes.delete(Number(app.container_id));
     } catch {}
 
     db.prepare('UPDATE apps SET status = ? WHERE id = ?').run('stopped', app.id);

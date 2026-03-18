@@ -32,7 +32,7 @@ router.use('/app/:slug', (req, res) => {
   if (!appRow) return res.status(503).send(`<h1>App "${slug}" is not running</h1>`);
 
   req.url = req.url.replace(`/proxy/app/${slug}`, '') || '/';
-  proxy.web(req, res, { target: `http://${appRow.container_name}:${appRow.app_port}` });
+  proxy.web(req, res, { target: `http://localhost:${appRow.port}` });
 });
 
 export { proxy };
