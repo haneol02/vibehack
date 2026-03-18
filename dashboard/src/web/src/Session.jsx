@@ -40,7 +40,7 @@ export default function Session({ slug }) {
 
   const proto = window.location.protocol;
   const appUrl = `${proto}//${slug}.${domain}`;
-  const vscodeUrl = `${proto}//vscode.${domain}/?folder=/home/coder/projects/${slug}`;
+  const vscodeUrl = `${proto}//vscode-vibehack.haneol.kr/?folder=/home/coder/projects/${slug}`;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: 'calc(100vh - 56px)', overflow: 'hidden' }}>

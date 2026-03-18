@@ -13,7 +13,7 @@ async function api(path, method = 'GET', body = null) {
   return res.json();
 }
 
-function projectButtons(slug, proto = 'https') {
+function projectButtons(slug) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel('대시보드')
@@ -22,11 +22,11 @@ function projectButtons(slug, proto = 'https') {
     new ButtonBuilder()
       .setLabel('VS Code')
       .setStyle(ButtonStyle.Link)
-      .setURL(`${proto}://vscode.${DOMAIN}/?folder=/home/coder/projects/${slug}`),
+      .setURL(`https://vscode-vibehack.haneol.kr/?folder=/home/coder/projects/${slug}`),
   );
 }
 
-function appButtons(slug, proto = 'https') {
+function appButtons(slug) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setLabel('앱 열기')
@@ -39,7 +39,7 @@ function appButtons(slug, proto = 'https') {
     new ButtonBuilder()
       .setLabel('VS Code')
       .setStyle(ButtonStyle.Link)
-      .setURL(`${proto}://vscode.${DOMAIN}/?folder=/home/coder/projects/${slug}`),
+      .setURL(`https://vscode-vibehack.haneol.kr/?folder=/home/coder/projects/${slug}`),
   );
 }
 

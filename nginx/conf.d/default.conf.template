@@ -19,10 +19,10 @@ server {
     }
 }
 
-# VS Code: vscode.{{DOMAIN}}
+# VS Code: vscode-vibehack.haneol.kr
 server {
     listen 80;
-    server_name vscode.{{DOMAIN}};
+    server_name vscode-vibehack.haneol.kr;
 
     location / {
         proxy_pass http://code-server:8080;
