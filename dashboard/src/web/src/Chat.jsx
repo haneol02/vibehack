@@ -17,7 +17,7 @@ function MarkdownContent({ children }) {
               style={vscDarkPlus}
               language={match[1]}
               PreTag="div"
-              customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}
+              customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}
               {...props}
             >
               {String(children).replace(/\n$/, '')}
@@ -102,7 +102,6 @@ function Message({ msg }) {
           padding: '10px 14px',
           maxWidth: '90%',
           minWidth: 0,
-          overflow: 'hidden',
           fontSize: '13px',
           lineHeight: 1.6,
           color: isUser ? '#c8d8f8' : '#c8ccd8',
@@ -167,7 +166,7 @@ function StreamingMessage({ text, tools }) {
         <div style={{
           background: '#0d0e18', border: '1px solid #14162a',
           borderRadius: '12px 12px 12px 4px', padding: '10px 14px',
-          maxWidth: '90%', fontSize: '13px', lineHeight: 1.6,
+          maxWidth: '90%', minWidth: 0, fontSize: '13px', lineHeight: 1.6,
           color: '#c8ccd8', wordBreak: 'break-word',
         }}>
           <MarkdownContent>{text}</MarkdownContent><span style={{ opacity: 0.5 }}>▊</span>
