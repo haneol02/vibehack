@@ -19,8 +19,8 @@ jobs:
           script: |
             cd ~/vibehack
             git pull
-            export $(grep DOMAIN .env | head -1)
-            envsubst '${DOMAIN}' < nginx/conf.d/default.conf.template > nginx/conf.d/default.conf
+            DOMAIN=$(grep '^DOMAIN=' .env | cut -d= -f2)
+            sed "s/{{DOMAIN}}/$DOMAIN/g" nginx/conf.d/default.conf.template > nginx/conf.d/default.conf
             docker compose build
             docker compose up -d
             docker compose exec -T bot node src/register-commands.js
