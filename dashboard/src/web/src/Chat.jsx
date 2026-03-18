@@ -209,16 +209,25 @@ export default function Chat({ slug, projectId }) {
           userScrolledUpRef.current = false;
           scrollToBottom(true);
           // Add user message to chat (handles Discord/external messages not optimistically added)
+          // Also replaces any tmp- optimistic message to avoid duplicates
           if (event.data?.messageId && event.data?.message) {
+            const newMsg = {
+              id: event.data.messageId,
+              role: 'user',
+              content: event.data.message,
+              username: event.data.username || '사용자',
+              source: event.data.source || 'web',
+            };
             setMessages(prev => {
               if (prev.some(m => m.id === event.data.messageId)) return prev;
-              return [...prev, {
-                id: event.data.messageId,
-                role: 'user',
-                content: event.data.message,
-                username: event.data.username || '사용자',
-                source: event.data.source || 'web',
-              }];
+              // Replace tmp optimistic message if content matches
+              const tmpIdx = prev.findIndex(m => m.id.startsWith('tmp-') && m.content === event.data.message);
+              if (tmpIdx !== -1) {
+                const next = [...prev];
+                next[tmpIdx] = newMsg;
+                return next;
+              }
+              return [...prev, newMsg];
             });
           }
         } else if (event.type === 'chat.delta') {
