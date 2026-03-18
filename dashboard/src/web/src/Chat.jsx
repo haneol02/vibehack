@@ -187,8 +187,21 @@ export default function Chat({ slug, projectId }) {
           setStreamTools([]);
           streamBufferRef.current = '';
           streamToolsRef.current = [];
-          userScrolledUpRef.current = false; // reset scroll lock on new message
+          userScrolledUpRef.current = false;
           scrollToBottom(true);
+          // Add user message to chat (handles Discord/external messages not optimistically added)
+          if (event.data?.messageId && event.data?.message) {
+            setMessages(prev => {
+              if (prev.some(m => m.id === event.data.messageId)) return prev;
+              return [...prev, {
+                id: event.data.messageId,
+                role: 'user',
+                content: event.data.message,
+                username: event.data.username || '사용자',
+                source: event.data.source || 'web',
+              }];
+            });
+          }
         } else if (event.type === 'chat.delta') {
           const newText = event.data?.text || '';
           streamBufferRef.current += newText;
