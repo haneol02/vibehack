@@ -26,8 +26,8 @@ router.get('/stream', (req, res) => {
 
   eventBus.addSSEClient(projectId, res);
 
-  // Keep alive
-  const keepAlive = setInterval(() => res.write(':ping\n\n'), 30000);
+  // Keep alive - send actual data event so Cloudflare doesn't 524
+  const keepAlive = setInterval(() => res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`), 25000);
   req.on('close', () => clearInterval(keepAlive));
 });
 
