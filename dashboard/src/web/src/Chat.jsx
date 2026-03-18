@@ -17,7 +17,7 @@ function MarkdownContent({ children }) {
               style={vscDarkPlus}
               language={match[1]}
               PreTag="div"
-              customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}
+              customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}
               {...props}
             >
               {String(children).replace(/\n$/, '')}
@@ -102,6 +102,7 @@ function Message({ msg }) {
           padding: '10px 14px',
           maxWidth: '90%',
           minWidth: 0,
+          overflow: 'hidden',
           fontSize: '13px',
           lineHeight: 1.6,
           color: isUser ? '#c8d8f8' : '#c8ccd8',
