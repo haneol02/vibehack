@@ -13,16 +13,7 @@ router.get('/stream', (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  // Send recent events
-  const recent = db.prepare(`
-    SELECT * FROM events
-    WHERE (project_id = ? OR ? = '*')
-    ORDER BY created_at DESC LIMIT 50
-  `).all(projectId, projectId);
-
-  recent.reverse().forEach(evt => {
-    res.write(`data: ${JSON.stringify({ ...evt, data: JSON.parse(evt.data || '{}') })}\n\n`);
-  });
+  // Don't replay transient chat stream events — client initializes running state via REST
 
   eventBus.addSSEClient(projectId, res);
 

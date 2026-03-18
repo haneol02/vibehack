@@ -118,6 +118,11 @@ export default function Chat({ slug, projectId }) {
     fetch(`/api/sessions/${slug}/messages`)
       .then(r => r.json())
       .then(data => { setMessages(Array.isArray(data) ? data : []); });
+    // Initialize running state from server to recover from dashboard restarts mid-run
+    fetch(`/api/sessions/${slug}`)
+      .then(r => r.json())
+      .then(data => { setIsRunning(!!data.claudeRunning); })
+      .catch(() => {});
   }, [slug]);
 
   useEffect(() => { scrollToBottom(true); }, [slug]);
