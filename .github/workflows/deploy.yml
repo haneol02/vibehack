@@ -22,6 +22,8 @@ jobs:
             DOMAIN=$(grep '^DOMAIN=' .env | cut -d= -f2)
             sed "s/{{DOMAIN}}/$DOMAIN/g" nginx/conf.d/default.conf.template > nginx/conf.d/default.conf
             docker compose build
-            docker compose up -d
-            docker compose exec -T bot node src/register-commands.js
+            docker compose rm -f dashboard bot 2>/dev/null || true
+            docker compose up -d --remove-orphans
+            sleep 3
+            docker compose exec -T bot node src/register-commands.js || true
             echo "배포 완료!"
