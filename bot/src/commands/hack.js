@@ -203,7 +203,8 @@ export const hackCommand = {
             return interaction.editReply(`❌ ${chatRes.error}`);
           }
 
-          await interaction.editReply(`⏳ Claude가 \`${slug}\` 작업 중...`);
+          const truncatedMsg = message.length > 200 ? message.slice(0, 200) + '…' : message;
+          await interaction.editReply(`⏳ Claude가 \`${slug}\` 작업 중...\n> ${truncatedMsg}`);
 
           // Poll until done (max 5 min)
           let attempts = 0;
