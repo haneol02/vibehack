@@ -100,8 +100,18 @@ export default function Chat({ slug, projectId }) {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const messagesContainerRef = useRef(null);
+
+  const isAtBottom = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
+
+  const scrollToBottom = (force = false) => {
+    if (force || isAtBottom()) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
@@ -110,7 +120,8 @@ export default function Chat({ slug, projectId }) {
       .then(data => { setMessages(Array.isArray(data) ? data : []); });
   }, [slug]);
 
-  useEffect(() => { scrollToBottom(); }, [messages, streamText, streamTools]);
+  useEffect(() => { scrollToBottom(true); }, [slug]);
+  useEffect(() => { scrollToBottom(); }, [messages, streamText]);
 
   useEffect(() => {
     if (!projectId) return;
@@ -144,13 +155,17 @@ export default function Chat({ slug, projectId }) {
             setStreamText('');
             setStreamTools([]);
             if (finalText) {
-              setMessages(prev => [...prev, {
-                id: event.data?.messageId || `msg-${Date.now()}`,
-                role: 'assistant',
-                content: { text: finalText, tools: finalTools },
-                username: 'Claude',
-                source: 'system',
-              }]);
+              const newId = event.data?.messageId || `msg-${Date.now()}`;
+              setMessages(prev => {
+                if (prev.some(m => m.id === newId)) return prev;
+                return [...prev, {
+                  id: newId,
+                  role: 'assistant',
+                  content: { text: finalText, tools: finalTools },
+                  username: 'Claude',
+                  source: 'system',
+                }];
+              });
             }
           }, 200);
         } else if (event.type === 'chat.error') {
@@ -220,7 +235,7 @@ export default function Chat({ slug, projectId }) {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {messages.length === 0 && !isRunning && (
           <div style={{ textAlign: 'center', color: '#252838', fontSize: '13px', marginTop: '40px' }}>
             무엇을 만들고 싶으신가요?<br />
