@@ -39,6 +39,7 @@ export default function Session({ slug }) {
   };
 
   const appUrl = `http://${slug}.${domain}`;
+  const vscodeUrl = `http://vscode.${domain}/?folder=/home/coder/projects/${slug}`;
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: 'calc(100vh - 56px)', overflow: 'hidden' }}>
@@ -51,6 +52,13 @@ export default function Session({ slug }) {
             onChange={e => setStartCmd(e.target.value)}
             style={{ background: '#08090e', border: '1px solid #1a1d2e', borderRadius: '6px', color: '#8892a4', padding: '5px 10px', fontSize: '12px', width: '160px', outline: 'none', fontFamily: 'monospace' }}
           />
+          <a
+            href={vscodeUrl}
+            target="_blank"
+            rel="noreferrer"
+            style={{ background: 'none', border: '1px solid #1a1d2e', color: '#5b8af5', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', textDecoration: 'none', flexShrink: 0 }}
+          >⌨ VS Code</a>
+
           {app?.status === 'running' ? (
             <>
               <a href={appUrl} target="_blank" rel="noreferrer" style={{ color: '#3fb950', fontSize: '12px', textDecoration: 'none' }}>

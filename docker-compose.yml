@@ -34,6 +34,18 @@ services:
       - redis
       - dashboard
 
+  code-server:
+    image: codercom/code-server:latest
+    restart: unless-stopped
+    user: root
+    env_file: .env
+    environment:
+      - PASSWORD=${CODE_SERVER_PASSWORD}
+    volumes:
+      - ./projects:/home/coder/projects
+    networks:
+      - vibehack
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped
@@ -46,6 +58,7 @@ services:
       - vibehack
     depends_on:
       - dashboard
+      - code-server
 
 networks:
   vibehack:

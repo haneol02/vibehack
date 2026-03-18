@@ -220,7 +220,7 @@ export default function Chat({ slug, projectId }) {
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {messages.length === 0 && !isRunning && (
           <div style={{ textAlign: 'center', color: '#252838', fontSize: '13px', marginTop: '40px' }}>
             무엇을 만들고 싶으신가요?<br />
@@ -238,14 +238,18 @@ export default function Chat({ slug, projectId }) {
           <textarea
             ref={inputRef}
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={e => {
+              setInput(e.target.value);
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+            }}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
             placeholder={isRunning ? 'Claude가 작업 중...' : '메시지 입력... (Shift+Enter 줄바꿈)'}
             disabled={isRunning}
-            rows={2}
+            rows={1}
             style={{
               flex: 1, background: 'none', border: 'none', outline: 'none', color: '#e8eaf0', fontSize: '13px',
-              resize: 'none', fontFamily: 'inherit', lineHeight: 1.5,
+              resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden', minHeight: '22px',
             }}
           />
           <button
