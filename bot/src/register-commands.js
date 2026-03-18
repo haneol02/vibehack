@@ -32,7 +32,17 @@ const commands = [
     )
     .addSubcommand(sub => sub
       .setName('list')
-      .setDescription('프로젝트 목록')
+      .setDescription('프로젝트 목록 (상태, URL 포함)')
+    )
+    .addSubcommand(sub => sub
+      .setName('status')
+      .setDescription('프로젝트 상세 상태')
+      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
+    )
+    .addSubcommand(sub => sub
+      .setName('chat')
+      .setDescription('최근 대화 내역 보기')
+      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
     )
     .addSubcommand(sub => sub
       .setName('delete')
