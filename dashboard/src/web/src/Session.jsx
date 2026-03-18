@@ -43,7 +43,7 @@ export default function Session({ slug }) {
   const vscodeUrl = `${proto}//vscode-vibehack.haneol.kr/?folder=/home/coder/projects/${slug}`;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: 'calc(100vh - 56px)', overflow: 'hidden' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: '100%', overflow: 'hidden' }}>
       {/* Left: App preview */}
       <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid #14162a' }}>
         {/* App control bar */}

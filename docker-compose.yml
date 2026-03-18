@@ -62,6 +62,12 @@ services:
       - dashboard
       - code-server
 
+  app-runner:
+    build: ./app-runner
+    image: vibehack-app-runner
+    command: ["true"]
+    profiles: ["build"]
+
 networks:
   vibehack:
     name: vibehack

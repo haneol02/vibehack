@@ -42,7 +42,7 @@ export default function Dashboard() {
   const statusLabel = (s) => s === 'running' ? '실행 중' : '중단됨';
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 60px' }}>
+    <div style={{ height: '100%', overflowY: 'auto' }}><div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 60px' }}>
       <style>{`.hero-title { white-space: nowrap; } @media (max-width: 560px) { .hero-title { white-space: normal; } }`}</style>
 
       {/* New project form */}
@@ -114,7 +114,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+    </div></div>
   );
 }
 

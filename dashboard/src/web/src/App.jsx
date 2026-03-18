@@ -86,9 +86,9 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div style={{ minHeight: '100vh', background: '#08090e', color: '#e8eaf0', fontFamily: "'Pretendard', 'Noto Sans KR', 'Segoe UI', sans-serif" }}>
+      <div style={{ height: '100vh', overflow: 'hidden', background: '#08090e', color: '#e8eaf0', fontFamily: "'Pretendard', 'Noto Sans KR', 'Segoe UI', sans-serif", display: 'flex', flexDirection: 'column' }}>
         <Nav onLogout={() => setAuthenticated(false)} />
-        <div>
+        <div style={{ flex: 1, overflow: 'hidden' }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/project/:slug" element={<SessionPage />} />

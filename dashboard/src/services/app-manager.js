@@ -2,8 +2,6 @@ import Docker from 'dockerode';
 import { db } from './db.js';
 import { eventBus } from './event-bus.js';
 import { v4 as uuidv4 } from 'uuid';
-import { writeFileSync, unlinkSync, mkdirSync } from 'fs';
-import { execSync } from 'child_process';
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
@@ -17,29 +15,6 @@ function getNextAppPort(usedPorts) {
   throw new Error('No available app ports');
 }
 
-function updateNginxAppConfig(subdomain, port) {
-  const domain = process.env.DOMAIN || 'localhost';
-  const confPath = `/etc/nginx/conf.d/app-${subdomain}.conf`;
-  const config = `
-server {
-    listen 80;
-    server_name ${subdomain}.${domain};
-
-    location / {
-        proxy_pass http://localhost:${port};
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-`;
-  try {
-    writeFileSync(confPath, config);
-    execSync('nginx -s reload');
-  } catch {}
-}
 
 export const appManager = {
   async start(projectId, projectSlug, startCommand = 'npm start', appPort = 3000) {
@@ -72,9 +47,6 @@ export const appManager = {
 
     await container.start();
 
-    // Update nginx config
-    updateNginxAppConfig(subdomain, hostPort);
-
     db.prepare(`
       INSERT OR REPLACE INTO apps (id, project_id, container_id, container_name, port, app_port, subdomain, status, start_command)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'running', ?)
@@ -96,12 +68,6 @@ export const appManager = {
       const container = docker.getContainer(app.container_name);
       await container.stop();
       await container.remove();
-    } catch {}
-
-    // Remove nginx config
-    try {
-      unlinkSync(`/etc/nginx/conf.d/app-${app.subdomain}.conf`);
-      execSync('nginx -s reload');
     } catch {}
 
     db.prepare('UPDATE apps SET status = ? WHERE id = ?').run('stopped', app.id);
