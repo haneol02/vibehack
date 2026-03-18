@@ -33,9 +33,18 @@ export const appManager = {
       await existing.remove().catch(() => {});
     } catch {}
 
+    // Pull image if not present
+    const IMAGE = 'node:20-alpine';
+    await new Promise((resolve, reject) => {
+      docker.pull(IMAGE, (err, stream) => {
+        if (err) return reject(err);
+        docker.modem.followProgress(stream, (err) => err ? reject(err) : resolve());
+      });
+    });
+
     const container = await docker.createContainer({
       name: containerName,
-      Image: 'vibehack-app-runner',
+      Image: IMAGE,
       Cmd: ['/bin/sh', '-c', `cd /app && ${startCommand}`],
       Env: [`PORT=${appPort}`],
       HostConfig: {
