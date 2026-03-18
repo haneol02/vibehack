@@ -197,14 +197,27 @@ export const hackCommand = {
           const slug = interaction.options.getString('slug');
           const message = interaction.options.getString('message');
 
-          const result = await api(`/api/sessions/${slug}/chat/sync`, 'POST', { message, username: interaction.user.tag });
-
-          if (result.error) {
-            return interaction.editReply(`❌ ${result.error}`);
+          // Use async chat + polling to avoid socket hang up on long tasks
+          const chatRes = await api(`/api/sessions/${slug}/chat`, 'POST', { message, username: interaction.user.tag });
+          if (chatRes.error) {
+            return interaction.editReply(`❌ ${chatRes.error}`);
           }
 
-          const reply = result.reply || '(응답 없음)';
-          const truncated = reply.length > 1800 ? reply.slice(0, 1800) + '…' : reply;
+          await interaction.editReply(`⏳ Claude가 \`${slug}\` 작업 중...`);
+
+          // Poll until done (max 5 min)
+          let attempts = 0;
+          while (attempts < 60) {
+            await new Promise(r => setTimeout(r, 5000));
+            attempts++;
+            const status = await api(`/api/sessions/${slug}`).catch(() => ({}));
+            if (!status.claudeRunning) break;
+          }
+
+          const msgs = await api(`/api/sessions/${slug}/messages`).catch(() => []);
+          const last = Array.isArray(msgs) ? [...msgs].reverse().find(m => m.role === 'assistant') : null;
+          const replyText = last?.content?.text || last?.content || '완료됐습니다.';
+          const truncated = String(replyText).length > 1800 ? String(replyText).slice(0, 1800) + '…' : String(replyText);
 
           const embed = new EmbedBuilder()
             .setColor(0x5b8af5)
