@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 
 const API_URL = process.env.DASHBOARD_API_URL || 'http://dashboard:3001';
 const DOMAIN = process.env.DOMAIN || 'localhost';
@@ -13,13 +13,59 @@ async function api(path, method = 'GET', body = null) {
   return res.json();
 }
 
+function projectButtons(slug, proto = 'https') {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel('대시보드')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${proto}://${DOMAIN}/session/${slug}`),
+    new ButtonBuilder()
+      .setLabel('VS Code')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${proto}://vscode.${DOMAIN}/?folder=/home/coder/projects/${slug}`),
+  );
+}
+
+function appButtons(slug, proto = 'https') {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setLabel('앱 열기')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${proto}://${slug}.${DOMAIN}`),
+    new ButtonBuilder()
+      .setLabel('대시보드')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${proto}://${DOMAIN}/session/${slug}`),
+    new ButtonBuilder()
+      .setLabel('VS Code')
+      .setStyle(ButtonStyle.Link)
+      .setURL(`${proto}://vscode.${DOMAIN}/?folder=/home/coder/projects/${slug}`),
+  );
+}
+
 export const hackCommand = {
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
-    await interaction.deferReply({ ephemeral: sub === 'join' });
+    await interaction.deferReply();
 
     try {
       switch (sub) {
+        case 'help': {
+          const embed = new EmbedBuilder()
+            .setColor(0x5b8af5)
+            .setTitle('🛠 VibHack 명령어 도움말')
+            .addFields(
+              { name: '/hack new <name>', value: '새 프로젝트 생성' },
+              { name: '/hack ask <slug> <message>', value: 'Claude에게 작업 요청' },
+              { name: '/hack preview <slug> [command]', value: '앱 실행 및 URL 확인' },
+              { name: '/hack stop-app <slug>', value: '앱 컨테이너 중단' },
+              { name: '/hack list', value: '프로젝트 목록 보기' },
+              { name: '/hack delete <slug>', value: '프로젝트 완전 삭제' },
+            );
+          await interaction.editReply({ embeds: [embed] });
+          break;
+        }
+
         case 'new': {
           const name = interaction.options.getString('name');
           const project = await api('/api/projects', 'POST', {
@@ -32,27 +78,39 @@ export const hackCommand = {
             return interaction.editReply(`❌ ${project.error}`);
           }
 
-          // Start session
-          const session = await api(`/api/sessions/${project.slug}/start`, 'POST');
-          const sessionUrl = `https://${DOMAIN}/proxy/session/${project.slug}/`;
+          await api(`/api/sessions/${project.slug}/start`, 'POST');
 
           const embed = new EmbedBuilder()
             .setColor(0x00AE86)
             .setTitle(`🚀 ${project.name}`)
-            .setDescription(`프로젝트가 생성되었습니다!`)
+            .setDescription('프로젝트가 생성되었습니다!')
             .addFields(
               { name: '슬러그', value: `\`${project.slug}\``, inline: true },
-              { name: '세션 URL', value: sessionUrl },
             );
 
-          await interaction.editReply({ embeds: [embed] });
+          await interaction.editReply({ embeds: [embed], components: [projectButtons(project.slug)] });
           break;
         }
 
-        case 'join': {
+        case 'ask': {
           const slug = interaction.options.getString('slug');
-          const sessionUrl = `https://${DOMAIN}/proxy/session/${slug}/`;
-          await interaction.editReply({ content: `🔗 세션 URL: ${sessionUrl}`, ephemeral: true });
+          const message = interaction.options.getString('message');
+
+          const result = await api(`/api/sessions/${slug}/chat/sync`, 'POST', { message, username: interaction.user.tag });
+
+          if (result.error) {
+            return interaction.editReply(`❌ ${result.error}`);
+          }
+
+          const reply = result.reply || '(응답 없음)';
+          const truncated = reply.length > 1800 ? reply.slice(0, 1800) + '…' : reply;
+
+          const embed = new EmbedBuilder()
+            .setColor(0x5b8af5)
+            .setTitle(`💬 Claude @ ${slug}`)
+            .setDescription(truncated);
+
+          await interaction.editReply({ embeds: [embed], components: [projectButtons(slug)] });
           break;
         }
 
@@ -70,11 +128,10 @@ export const hackCommand = {
             .setColor(0x00AE86)
             .setTitle(`▶ 앱 실행됨: ${slug}`)
             .addFields(
-              { name: '앱 URL', value: result.url },
               { name: '시작 명령어', value: `\`${command}\`` },
             );
 
-          await interaction.editReply({ embeds: [embed] });
+          await interaction.editReply({ embeds: [embed], components: [appButtons(slug)] });
           break;
         }
 
@@ -94,36 +151,11 @@ export const hackCommand = {
           const embed = new EmbedBuilder()
             .setColor(0x00AE86)
             .setTitle('📋 VibHack 프로젝트 목록')
-            .setDescription(projects.map(p => `**${p.name}** (\`${p.slug}\`) - ${p.session_status === 'running' ? '🟢 실행 중' : '⚫ 중단됨'}`).join('\n'));
+            .setDescription(projects.map(p =>
+              `**${p.name}** (\`${p.slug}\`)`
+            ).join('\n'));
 
           await interaction.editReply({ embeds: [embed] });
-          break;
-        }
-
-        case 'start': {
-          const slug = interaction.options.getString('slug');
-          const session = await api(`/api/sessions/${slug}/start`, 'POST');
-          if (session.error) {
-            return interaction.editReply(`❌ ${session.error}`);
-          }
-          const domain = process.env.DOMAIN || 'localhost';
-          const sessionUrl = `https://${domain}/proxy/session/${slug}/`;
-          await interaction.editReply(`▶ \`${slug}\` 세션이 시작되었습니다.\n🔗 ${sessionUrl}`);
-          break;
-        }
-
-        case 'stop': {
-          const slug = interaction.options.getString('slug');
-          await api(`/api/sessions/${slug}/stop`, 'POST');
-          await interaction.editReply(`⏹ \`${slug}\` 세션이 중단되었습니다.`);
-          break;
-        }
-
-        case 'log': {
-          const slug = interaction.options.getString('slug');
-          const { log } = await api(`/api/sessions/${slug}/log`);
-          const truncated = log?.slice(-1800) || '(로그 없음)';
-          await interaction.editReply(`\`\`\`\n${truncated}\n\`\`\``);
           break;
         }
 

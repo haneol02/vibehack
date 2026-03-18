@@ -39,6 +39,26 @@ router.post('/:slug/chat', async (req, res) => {
   res.json({ ok: true });
 });
 
+// Synchronous endpoint for Discord bot (waits for Claude to finish)
+router.post('/:slug/chat/sync', async (req, res) => {
+  const { message, username } = req.body;
+  if (!message) return res.status(400).json({ error: 'message required' });
+
+  const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
+  if (!project) return res.status(404).json({ error: 'project not found' });
+
+  if (claudeRunner.isRunning(req.params.slug)) {
+    return res.status(409).json({ error: 'Claude가 이미 실행 중입니다' });
+  }
+
+  try {
+    const result = await claudeRunner.run(project.slug, project.id, message, username || 'Discord', 'discord');
+    res.json({ reply: result.text });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:slug/messages', (req, res) => {
   const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
   if (!project) return res.status(404).json({ error: 'project not found' });

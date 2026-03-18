@@ -5,14 +5,19 @@ const commands = [
     .setName('hack')
     .setDescription('VibHack 해커톤 관리 명령어')
     .addSubcommand(sub => sub
+      .setName('help')
+      .setDescription('명령어 도움말')
+    )
+    .addSubcommand(sub => sub
       .setName('new')
       .setDescription('새 프로젝트 생성')
       .addStringOption(opt => opt.setName('name').setDescription('프로젝트 이름').setRequired(true))
     )
     .addSubcommand(sub => sub
-      .setName('join')
-      .setDescription('세션 URL 받기 (DM)')
+      .setName('ask')
+      .setDescription('Claude에게 작업 요청')
       .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
+      .addStringOption(opt => opt.setName('message').setDescription('요청 내용').setRequired(true))
     )
     .addSubcommand(sub => sub
       .setName('preview')
@@ -27,26 +32,11 @@ const commands = [
     )
     .addSubcommand(sub => sub
       .setName('list')
-      .setDescription('활성 세션/앱 목록')
-    )
-    .addSubcommand(sub => sub
-      .setName('start')
-      .setDescription('Claude 세션 시작 (재활성화)')
-      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
-    )
-    .addSubcommand(sub => sub
-      .setName('stop')
-      .setDescription('Claude 세션 중단')
-      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
-    )
-    .addSubcommand(sub => sub
-      .setName('log')
-      .setDescription('최근 tmux 스크롤백')
-      .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
+      .setDescription('프로젝트 목록')
     )
     .addSubcommand(sub => sub
       .setName('delete')
-      .setDescription('프로젝트 완전 삭제 (컨테이너 + 데이터 모두 제거)')
+      .setDescription('프로젝트 완전 삭제')
       .addStringOption(opt => opt.setName('slug').setDescription('프로젝트 슬러그').setRequired(true))
     )
     .toJSON()
