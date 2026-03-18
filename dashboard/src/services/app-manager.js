@@ -61,7 +61,7 @@ export const appManager = {
 
     eventBus.publish('app.started', { projectSlug, subdomain, url, port }, projectId);
 
-    return { appId, port, subdomain, url };
+    return { appId, port, subdomain, url, status: 'running' };
   },
 
   async stop(projectId, projectSlug) {
