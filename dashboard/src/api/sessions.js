@@ -22,7 +22,7 @@ router.post('/:slug/stop', (req, res) => {
 });
 
 router.post('/:slug/chat', async (req, res) => {
-  const { message, username, source } = req.body;
+  const { message, username, source, model } = req.body;
   if (!message) return res.status(400).json({ error: 'message required' });
 
   const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
@@ -33,7 +33,7 @@ router.post('/:slug/chat', async (req, res) => {
   }
 
   // Run async - client listens via SSE
-  claudeRunner.run(project.slug, project.id, message, username || '사용자', source || 'web')
+  claudeRunner.run(project.slug, project.id, message, username || '사용자', source || 'web', model || null)
     .catch(err => console.error('Claude run error:', err));
 
   res.json({ ok: true });

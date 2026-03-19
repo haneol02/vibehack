@@ -117,7 +117,7 @@ export const claudeRunner = {
     return running.get(slug) === true;
   },
 
-  async run(slug, projectId, prompt, username = '사용자', source = 'web') {
+  async run(slug, projectId, prompt, username = '사용자', source = 'web', model = null) {
     if (running.get(slug)) {
       throw new Error('Claude가 이미 실행 중입니다');
     }
@@ -138,7 +138,7 @@ export const claudeRunner = {
 
     // Build context from recent conversation history (last 5 exchanges)
     const history = db.prepare(
-      'SELECT role, content, username FROM messages WHERE project_id = ? AND id != ? ORDER BY created_at DESC LIMIT 10'
+      'SELECT role, content, username FROM messages WHERE project_id = ? AND id != ? ORDER BY created_at DESC LIMIT 5'
     ).all(projectId, userMsgId).reverse();
 
     let contextPrompt = prompt;
@@ -164,7 +164,9 @@ export const claudeRunner = {
 
     try {
       await new Promise((resolve, reject) => {
-        const proc = spawn('claude', ['-p', contextPrompt, '--output-format', 'stream-json', '--verbose', '--max-turns', '30', '--allowedTools', 'Bash,Write,Edit,MultiEdit,Read,Glob,Grep,LS,TodoWrite,TodoRead,WebFetch,WebSearch'], {
+        const args = ['-p', contextPrompt, '--output-format', 'stream-json', '--verbose', '--max-turns', '30', '--allowedTools', 'Bash,Write,Edit,MultiEdit,Read,Glob,Grep,LS,TodoWrite,TodoRead,WebFetch,WebSearch'];
+        if (model) args.push('--model', model);
+        const proc = spawn('claude', args, {
           cwd: projectDir,
           env: { ...process.env, HOME: '/root' },
           stdio: ['ignore', 'pipe', 'pipe'],

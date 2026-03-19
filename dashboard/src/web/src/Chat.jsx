@@ -195,6 +195,7 @@ export default function Chat({ slug, projectId }) {
   const [input, setInput] = useState('');
   const [username, setUsername] = useState(() => localStorage.getItem('vibehack-username') || '');
   const [isRunning, setIsRunning] = useState(false);
+  const [model, setModel] = useState(() => localStorage.getItem('vibehack-model') || '');
   const [streamText, setStreamText] = useState('');
   const [streamTools, setStreamTools] = useState([]);
   const streamBufferRef = useRef('');
@@ -339,6 +340,7 @@ export default function Chat({ slug, projectId }) {
     const msg = input.trim();
     if (!msg || isRunning) return;
     setInput('');
+    if (inputRef.current) inputRef.current.style.height = 'auto';
 
     setMessages(prev => [...prev, {
       id: `tmp-${Date.now()}`,
@@ -351,7 +353,7 @@ export default function Chat({ slug, projectId }) {
     const res = await fetch(`/api/sessions/${slug}/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, username: username || '익명', source: 'web' }),
+      body: JSON.stringify({ message: msg, username: username || '익명', source: 'web', model: model || undefined }),
     });
 
     if (!res.ok) {
@@ -405,6 +407,28 @@ export default function Chat({ slug, projectId }) {
 
       {/* Input */}
       <div style={{ padding: '12px 16px', borderTop: '1px solid #14162a', flexShrink: 0 }}>
+        {/* Model selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+          <span style={{ fontSize: '10px', color: '#3e4358' }}>모델</span>
+          {[
+            { value: '', label: 'Default' },
+            { value: 'claude-haiku-4-5-20251001', label: 'Haiku' },
+            { value: 'claude-sonnet-4-6', label: 'Sonnet' },
+            { value: 'claude-opus-4-6', label: 'Opus' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => { setModel(opt.value); localStorage.setItem('vibehack-model', opt.value); }}
+              style={{
+                background: model === opt.value ? '#1a2240' : 'none',
+                border: `1px solid ${model === opt.value ? '#5b8af5' : '#1a1d2e'}`,
+                color: model === opt.value ? '#5b8af5' : '#484d5a',
+                borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >{opt.label}</button>
+          ))}
+        </div>
         <div style={{ display: 'flex', gap: '8px', background: '#0c0d15', border: `1px solid ${isRunning ? '#1e2240' : '#1a1d2e'}`, borderRadius: '10px', padding: '8px 12px', transition: 'border-color 0.2s' }}>
           <textarea
             ref={inputRef}
