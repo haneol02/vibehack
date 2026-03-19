@@ -40,6 +40,13 @@ export default function Session({ slug }) {
     setApp({ status: 'stopped' });
   };
 
+  const killAll = async () => {
+    if (!confirm('모든 앱 프로세스와 포트를 초기화하시겠습니까?')) return;
+    await fetch('/api/apps/kill-all', { method: 'POST' });
+    setApp({ status: 'stopped' });
+    alert('초기화 완료');
+  };
+
   const clearCache = async () => {
     if (!confirm('캐시를 삭제하시겠습니까? (node_modules, .next, dist 등)')) return;
     const res = await fetch(`/api/apps/${slug}/clear-cache`, { method: 'POST' });
@@ -86,6 +93,11 @@ export default function Session({ slug }) {
             onMouseEnter={e => { e.currentTarget.style.color = '#8892a4'; e.currentTarget.style.borderColor = '#2a2d3e'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#484d5a'; e.currentTarget.style.borderColor = '#1a1d2e'; }}
           >캐시 삭제</button>
+          <button onClick={killAll}
+            style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flexShrink: 0 }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+          >전체 초기화</button>
 
           {app?.status === 'running' ? (
             <>
