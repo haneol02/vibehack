@@ -133,6 +133,21 @@ export const appManager = {
     return appLogs.get(slug) || [];
   },
 
+  async clearCache(projectSlug) {
+    const projectRoot = findProjectRoot(`/projects/${projectSlug}`);
+    const { execSync } = await import('child_process');
+    const removed = [];
+    const cacheDirs = ['node_modules', '.next', 'dist', '.cache', '.nuxt', '.output', '.vite'];
+    for (const dir of cacheDirs) {
+      const fullPath = join(projectRoot, dir);
+      if (existsSync(fullPath)) {
+        execSync(`rm -rf "${fullPath}"`, { timeout: 30000 });
+        removed.push(dir);
+      }
+    }
+    return removed;
+  },
+
   async stop(projectId, projectSlug) {
     const app = db.prepare('SELECT * FROM apps WHERE project_id = ? AND status = ?').get(projectId, 'running');
     if (!app) return null;

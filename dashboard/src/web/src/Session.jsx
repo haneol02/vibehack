@@ -40,6 +40,14 @@ export default function Session({ slug }) {
     setApp({ status: 'stopped' });
   };
 
+  const clearCache = async () => {
+    if (!confirm('캐시를 삭제하시겠습니까? (node_modules, .next, dist 등)')) return;
+    const res = await fetch(`/api/apps/${slug}/clear-cache`, { method: 'POST' });
+    const data = await res.json();
+    if (data.removed?.length) alert(`삭제됨: ${data.removed.join(', ')}`);
+    else alert('삭제할 캐시가 없습니다');
+  };
+
   const proto = window.location.protocol;
   const appUrl = `${proto}//${slug}.${domain}`;
   const vscodeUrl = `${proto}//vscode-vibehack.haneol.kr/?folder=/home/coder/projects/${slug}`;
@@ -73,6 +81,11 @@ export default function Session({ slug }) {
             rel="noreferrer"
             style={{ background: 'none', border: '1px solid #1a1d2e', color: '#5b8af5', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', textDecoration: 'none', flexShrink: 0 }}
           >VS Code</a>
+          <button onClick={clearCache}
+            style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flexShrink: 0 }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#8892a4'; e.currentTarget.style.borderColor = '#2a2d3e'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#484d5a'; e.currentTarget.style.borderColor = '#1a1d2e'; }}
+          >캐시 삭제</button>
 
           {app?.status === 'running' ? (
             <>

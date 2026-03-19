@@ -35,6 +35,18 @@ router.get('/:slug/logs', (req, res) => {
   res.json(appManager.getLogs(req.params.slug));
 });
 
+router.post('/:slug/clear-cache', async (req, res) => {
+  const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
+  if (!project) return res.status(404).json({ error: 'project not found' });
+
+  try {
+    const removed = await appManager.clearCache(project.slug);
+    res.json({ ok: true, removed });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:slug', (req, res) => {
   const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
   if (!project) return res.status(404).json({ error: 'project not found' });

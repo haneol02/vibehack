@@ -373,6 +373,12 @@ export default function Chat({ slug, projectId }) {
               Claude 작업 중
             </span>
           )}
+          {messages.length > 0 && !isRunning && (
+            <button
+              onClick={() => setMessages([])}
+              style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
+            >채팅 지우기</button>
+          )}
         </div>
         {editingName ? (
           <form onSubmit={e => { e.preventDefault(); saveUsername(username); }} style={{ display: 'flex', gap: '6px' }}>
