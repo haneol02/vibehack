@@ -22,12 +22,13 @@ export default function LogPanel({ slug, projectId }) {
       try {
         const event = JSON.parse(e.data);
         if (event.type === 'app.log') {
+          const entry = { ...event.data, time: event.data.time || event.timestamp || Date.now() };
           setLogs(prev => {
-            const next = [...prev, event.data];
+            const next = [...prev, entry];
             return next.length > 500 ? next.slice(-500) : next;
           });
         } else if (event.type === 'app.started') {
-          setLogs([{ time: Date.now(), stream: 'system', text: `App started (port ${event.data?.port})` }]);
+          setLogs([{ time: event.timestamp || Date.now(), stream: 'system', text: `App started (port ${event.data?.port})` }]);
         }
       } catch {}
     };
@@ -83,8 +84,8 @@ export default function LogPanel({ slug, projectId }) {
         )}
         {logs.map((log, i) => (
           <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '1px' }}>
-            <span style={{ color: '#2e3244', flexShrink: 0 }}>
-              {new Date(log.time).toLocaleTimeString('ko-KR', { hour12: false })}
+            <span style={{ color: '#2e3244', flexShrink: 0, userSelect: 'none' }}>
+              {log.time ? new Date(log.time).toLocaleTimeString('ko-KR', { hour12: false }) : '--:--:--'}
             </span>
             <span style={{ color: streamColor(log.stream), wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
               {log.text}
