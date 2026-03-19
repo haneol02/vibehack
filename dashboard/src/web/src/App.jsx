@@ -3,6 +3,32 @@ import { BrowserRouter, Routes, Route, useNavigate, useParams, Link, useLocation
 import Dashboard from './Dashboard.jsx';
 import Session from './Session.jsx';
 import Login from './Login.jsx';
+import { useTheme } from './ThemeContext.jsx';
+
+function ThemeSwitcher() {
+  const { theme, setTheme, THEMES } = useTheme();
+  return (
+    <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-primary)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-secondary)' }}>
+      {THEMES.map(t => (
+        <button
+          key={t.id}
+          onClick={() => setTheme(t.id)}
+          style={{
+            background: theme === t.id ? 'var(--accent-bg)' : 'none',
+            border: 'none',
+            color: theme === t.id ? 'var(--accent)' : 'var(--text-muted)',
+            fontSize: '11px',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+            fontWeight: theme === t.id ? 600 : 400,
+          }}
+        >{t.label}</button>
+      ))}
+    </div>
+  );
+}
 
 function Nav({ onLogout }) {
   const navigate = useNavigate();
@@ -16,9 +42,9 @@ function Nav({ onLogout }) {
 
   return (
     <nav style={{
-      background: 'rgba(8,9,14,0.9)',
+      background: 'var(--bg-nav)',
       backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid #16182a',
+      borderBottom: '1px solid var(--border-primary)',
       padding: '0 32px',
       height: '56px',
       display: 'flex',
@@ -28,16 +54,17 @@ function Nav({ onLogout }) {
       top: 0,
       zIndex: 100,
     }}>
-      <Link to="/" style={{ fontSize: '17px', fontWeight: 800, color: '#fff', textDecoration: 'none', letterSpacing: '-0.5px' }}>
-        Vibe<span style={{ color: '#5b8af5' }}>Hack</span>
+      <Link to="/" style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', textDecoration: 'none', letterSpacing: '-0.5px' }}>
+        Vibe<span style={{ color: 'var(--accent)' }}>Hack</span>
       </Link>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <ThemeSwitcher />
         {isSession && (
           <button onClick={() => navigate('/')} style={{
             background: 'none',
-            border: '1px solid #1e2235',
-            color: '#8892a4',
+            border: '1px solid var(--border-active)',
+            color: 'var(--text-tertiary)',
             padding: '5px 14px',
             borderRadius: '6px',
             cursor: 'pointer',
@@ -49,8 +76,8 @@ function Nav({ onLogout }) {
         )}
         <button onClick={handleLogout} style={{
           background: 'none',
-          border: '1px solid #1e2235',
-          color: '#484d5a',
+          border: '1px solid var(--border-active)',
+          color: 'var(--text-muted)',
           padding: '5px 14px',
           borderRadius: '6px',
           cursor: 'pointer',
@@ -86,7 +113,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div style={{ height: '100vh', overflow: 'hidden', background: '#08090e', color: '#e8eaf0', fontFamily: "'Pretendard', 'Noto Sans KR', 'Segoe UI', sans-serif", display: 'flex', flexDirection: 'column' }}>
+      <div style={{ height: '100vh', overflow: 'hidden', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: "'Pretendard', 'Noto Sans KR', 'Segoe UI', sans-serif", display: 'flex', flexDirection: 'column' }}>
         <Nav onLogout={() => setAuthenticated(false)} />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <Routes>

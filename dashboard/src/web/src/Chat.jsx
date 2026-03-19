@@ -27,13 +27,13 @@ function MarkdownContent({ children }) {
           }
           if (!inline) {
             return (
-              <pre style={{ background: '#1a1d2e', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}>
+              <pre style={{ background: 'var(--code-bg)', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}>
                 <code style={{ fontFamily: 'monospace' }} {...props}>{children}</code>
               </pre>
             );
           }
           return (
-            <code style={{ background: '#1a1d2e', padding: '1px 5px', borderRadius: '3px', fontSize: '12px', fontFamily: 'monospace' }} {...props}>
+            <code style={{ background: 'var(--code-bg)', padding: '1px 5px', borderRadius: '3px', fontSize: '12px', fontFamily: 'monospace' }} {...props}>
               {children}
             </code>
           );
@@ -47,12 +47,12 @@ function MarkdownContent({ children }) {
         h2({ children }) { return <h2 style={{ fontSize: '14px', margin: '8px 0 4px', fontWeight: 700 }}>{children}</h2>; },
         h3({ children }) { return <h3 style={{ fontSize: '13px', margin: '6px 0 4px', fontWeight: 700 }}>{children}</h3>; },
         blockquote({ children }) {
-          return <blockquote style={{ borderLeft: '3px solid #2a3a6a', margin: '4px 0', paddingLeft: '10px', color: '#8892a4' }}>{children}</blockquote>;
+          return <blockquote style={{ borderLeft: '3px solid var(--blockquote-border)', margin: '4px 0', paddingLeft: '10px', color: 'var(--text-tertiary)' }}>{children}</blockquote>;
         },
         a({ href, children }) {
-          return <a href={href} target="_blank" rel="noreferrer" style={{ color: '#5b8af5', textDecoration: 'underline' }}>{children}</a>;
+          return <a href={href} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>{children}</a>;
         },
-        hr() { return <hr style={{ border: 'none', borderTop: '1px solid #1a1d2e', margin: '8px 0' }} />; },
+        hr() { return <hr style={{ border: 'none', borderTop: '1px solid var(--border-secondary)', margin: '8px 0' }} />; },
       }}
     >
       {children}
@@ -62,14 +62,14 @@ function MarkdownContent({ children }) {
 
 function SourceIcon({ source }) {
   if (source === 'discord') {
-    return <span style={{ fontSize: '10px', background: '#5865f2', color: '#fff', borderRadius: '3px', padding: '1px 5px', marginLeft: '6px' }}>Discord</span>;
+    return <span style={{ fontSize: '10px', background: 'var(--discord-bg)', color: '#fff', borderRadius: '3px', padding: '1px 5px', marginLeft: '6px' }}>Discord</span>;
   }
   return null;
 }
 
 function ToolBlock({ tool }) {
   return (
-    <div style={{ fontSize: '11px', color: '#484d5a', padding: '2px 0', fontFamily: 'monospace' }}>
+    <div style={{ fontSize: '11px', color: 'var(--text-muted)', padding: '2px 0', fontFamily: 'monospace' }}>
       {tool.label}
     </div>
   );
@@ -87,15 +87,15 @@ function Message({ msg }) {
       alignItems: isUser ? 'flex-end' : 'flex-start',
       marginBottom: '12px',
     }}>
-      <div style={{ fontSize: '11px', color: '#484d5a', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
         <span>{isUser ? (msg.username || '사용자') : 'Claude'}</span>
         {msg.source && <SourceIcon source={msg.source} />}
       </div>
 
       {!isUser && tools.length > 0 && (
         <div style={{
-          background: '#0c0d15',
-          border: '1px solid #1a1d2e',
+          background: 'var(--bg-tertiary)',
+          border: '1px solid var(--border-secondary)',
           borderRadius: '6px',
           padding: '8px 12px',
           marginBottom: '6px',
@@ -107,8 +107,8 @@ function Message({ msg }) {
 
       {content && (
         <div style={{
-          background: isUser ? '#1e2a50' : '#0d0e18',
-          border: `1px solid ${isUser ? '#2a3a6a' : '#14162a'}`,
+          background: isUser ? 'var(--user-bubble-bg)' : 'var(--bg-elevated)',
+          border: `1px solid ${isUser ? 'var(--user-bubble-border)' : 'var(--border-primary)'}`,
           borderRadius: isUser ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
           padding: '10px 14px',
           maxWidth: '90%',
@@ -116,7 +116,7 @@ function Message({ msg }) {
           overflow: 'hidden',
           fontSize: '13px',
           lineHeight: 1.6,
-          color: isUser ? '#c8d8f8' : '#c8ccd8',
+          color: isUser ? 'var(--user-bubble-text)' : 'var(--text-secondary)',
           wordBreak: 'break-word',
         }}>
           {isUser ? <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span> : <MarkdownContent>{content}</MarkdownContent>}
@@ -141,28 +141,28 @@ function StreamingMessage({ text, tools }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
         <div style={{
           width: '7px', height: '7px', borderRadius: '50%',
-          background: '#5b8af5',
+          background: 'var(--accent)',
           opacity: pulse ? 1 : 0.3,
           transition: 'opacity 0.3s',
           flexShrink: 0,
         }} />
-        <span style={{ fontSize: '11px', color: '#5b8af5', fontWeight: 600 }}>Claude 작업 중</span>
+        <span style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 600 }}>Claude 작업 중</span>
         {tools.length > 0 && (
-          <span style={{ fontSize: '11px', color: '#484d5a' }}>· {tools.length}개 작업</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>· {tools.length}개 작업</span>
         )}
       </div>
 
       {/* Current tool */}
       {latestTool && (
         <div style={{
-          background: '#0c0d15',
-          border: '1px solid #1e2240',
+          background: 'var(--bg-tertiary)',
+          border: '1px solid var(--input-border-active)',
           borderRadius: '6px',
           padding: '6px 12px',
           marginBottom: '6px',
           width: '100%',
           fontSize: '11px',
-          color: '#6b7aaa',
+          color: 'var(--text-tertiary)',
           fontFamily: 'monospace',
           display: 'flex',
           alignItems: 'center',
@@ -176,15 +176,15 @@ function StreamingMessage({ text, tools }) {
       {/* Streaming text */}
       {text ? (
         <div style={{
-          background: '#0d0e18', border: '1px solid #14162a',
+          background: 'var(--bg-elevated)', border: '1px solid var(--border-primary)',
           borderRadius: '12px 12px 12px 4px', padding: '10px 14px',
           maxWidth: '90%', minWidth: 0, overflow: 'hidden', fontSize: '13px', lineHeight: 1.6,
-          color: '#c8ccd8', wordBreak: 'break-word',
+          color: 'var(--text-secondary)', wordBreak: 'break-word',
         }}>
           <MarkdownContent>{text}</MarkdownContent><span style={{ opacity: 0.5 }}>▊</span>
         </div>
       ) : !latestTool && (
-        <div style={{ color: '#484d5a', fontSize: '12px' }}>생각 중...</div>
+        <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>생각 중...</div>
       )}
     </div>
   );
@@ -227,15 +227,13 @@ export default function Chat({ slug, projectId }) {
     fetch(`/api/sessions/${slug}/messages`)
       .then(r => r.json())
       .then(data => { setMessages(Array.isArray(data) ? data : []); });
-    // Initialize running state from server to recover from dashboard restarts mid-run
     fetch(`/api/sessions/${slug}`)
       .then(r => r.json())
       .then(data => { setIsRunning(!!data.claudeRunning); })
       .catch(() => {});
   }, [slug]);
 
-  // Poll running state every 3s to catch externally-triggered runs (e.g. Discord /hack ask)
-  // that may have fired chat.start before SSE was connected or during a reconnect gap
+  // Poll running state every 3s
   useEffect(() => {
     const interval = setInterval(() => {
       fetch(`/api/sessions/${slug}`)
@@ -243,7 +241,6 @@ export default function Chat({ slug, projectId }) {
         .then(data => {
           const serverRunning = !!data.claudeRunning;
           setIsRunning(prev => {
-            // Only sync if state diverged (avoid unnecessary re-renders)
             if (prev !== serverRunning) return serverRunning;
             return prev;
           });
@@ -270,8 +267,6 @@ export default function Chat({ slug, projectId }) {
           streamToolsRef.current = [];
           userScrolledUpRef.current = false;
           scrollToBottom(true);
-          // Add user message to chat (handles Discord/external messages not optimistically added)
-          // Also replaces any tmp- optimistic message to avoid duplicates
           if (event.data?.messageId && event.data?.message) {
             const newMsg = {
               id: event.data.messageId,
@@ -282,7 +277,6 @@ export default function Chat({ slug, projectId }) {
             };
             setMessages(prev => {
               if (prev.some(m => m.id === event.data.messageId)) return prev;
-              // Replace tmp optimistic message if content matches
               const tmpIdx = prev.findIndex(m => m.id.startsWith('tmp-') && m.content === event.data.message);
               if (tmpIdx !== -1) {
                 const next = [...prev];
@@ -364,19 +358,19 @@ export default function Chat({ slug, projectId }) {
 
   return (
     <div style={{ position: 'relative', height: '100%' }}>
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: '#08090e' }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
       {/* Header */}
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isRunning && (
-            <span style={{ fontSize: '10px', background: '#1a2040', color: '#5b8af5', borderRadius: '4px', padding: '2px 6px' }}>
+            <span style={{ fontSize: '10px', background: 'var(--accent-bg)', color: 'var(--accent)', borderRadius: '4px', padding: '2px 6px' }}>
               Claude 작업 중
             </span>
           )}
           {messages.length > 0 && !isRunning && (
             <button
               onClick={() => setMessages([])}
-              style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
+              style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--text-muted)', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
             >채팅 지우기</button>
           )}
         </div>
@@ -387,12 +381,12 @@ export default function Chat({ slug, projectId }) {
               value={username}
               onChange={e => setUsername(e.target.value)}
               placeholder="닉네임 입력..."
-              style={{ background: '#0c0d15', border: '1px solid #1a1d2e', borderRadius: '5px', color: '#e8eaf0', fontSize: '12px', padding: '4px 8px', width: '110px', outline: 'none' }}
+              style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-secondary)', borderRadius: '5px', color: 'var(--text-primary)', fontSize: '12px', padding: '4px 8px', width: '110px', outline: 'none' }}
             />
-            <button type="submit" style={{ background: '#5b8af5', border: 'none', color: '#fff', borderRadius: '5px', fontSize: '11px', padding: '4px 8px', cursor: 'pointer' }}>저장</button>
+            <button type="submit" style={{ background: 'var(--accent)', border: 'none', color: '#fff', borderRadius: '5px', fontSize: '11px', padding: '4px 8px', cursor: 'pointer' }}>저장</button>
           </form>
         ) : (
-          <button onClick={() => setEditingName(true)} style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', borderRadius: '5px', fontSize: '11px', padding: '3px 8px', cursor: 'pointer' }}>
+          <button onClick={() => setEditingName(true)} style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--text-muted)', borderRadius: '5px', fontSize: '11px', padding: '3px 8px', cursor: 'pointer' }}>
             {username || '익명'} ✏️
           </button>
         )}
@@ -401,7 +395,7 @@ export default function Chat({ slug, projectId }) {
       {/* Messages */}
       <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {messages.length === 0 && !isRunning && (
-          <div style={{ textAlign: 'center', color: '#252838', fontSize: '13px', marginTop: '40px' }}>
+          <div style={{ textAlign: 'center', color: 'var(--text-faint)', fontSize: '13px', marginTop: '40px' }}>
             무엇을 만들고 싶으신가요?<br />
             <span style={{ fontSize: '11px' }}>아이디어를 입력하면 Claude가 앱을 만들어드립니다</span>
           </div>
@@ -412,10 +406,10 @@ export default function Chat({ slug, projectId }) {
       </div>
 
       {/* Input */}
-      <div style={{ padding: '12px 16px', borderTop: '1px solid #14162a', flexShrink: 0 }}>
+      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-primary)', flexShrink: 0 }}>
         {/* Model selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <span style={{ fontSize: '10px', color: '#3e4358' }}>모델</span>
+          <span style={{ fontSize: '10px', color: 'var(--text-dimmed)' }}>모델</span>
           {[
             { value: '', label: 'Default' },
             { value: 'claude-haiku-4-5-20251001', label: 'Haiku' },
@@ -426,16 +420,16 @@ export default function Chat({ slug, projectId }) {
               key={opt.value}
               onClick={() => { setModel(opt.value); localStorage.setItem('vibehack-model', opt.value); }}
               style={{
-                background: model === opt.value ? '#1a2240' : 'none',
-                border: `1px solid ${model === opt.value ? '#5b8af5' : '#1a1d2e'}`,
-                color: model === opt.value ? '#5b8af5' : '#484d5a',
+                background: model === opt.value ? 'var(--accent-hover)' : 'none',
+                border: `1px solid ${model === opt.value ? 'var(--accent)' : 'var(--border-secondary)'}`,
+                color: model === opt.value ? 'var(--accent)' : 'var(--text-muted)',
                 borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer',
                 transition: 'all 0.15s',
               }}
             >{opt.label}</button>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: '8px', background: '#0c0d15', border: `1px solid ${isRunning ? '#1e2240' : '#1a1d2e'}`, borderRadius: '10px', padding: '8px 12px', transition: 'border-color 0.2s' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--bg-tertiary)', border: `1px solid ${isRunning ? 'var(--input-border-active)' : 'var(--border-secondary)'}`, borderRadius: '10px', padding: '8px 12px', transition: 'border-color 0.2s' }}>
           <textarea
             ref={inputRef}
             value={input}
@@ -449,7 +443,7 @@ export default function Chat({ slug, projectId }) {
             disabled={isRunning}
             rows={1}
             style={{
-              flex: 1, background: 'none', border: 'none', outline: 'none', color: '#e8eaf0', fontSize: '13px',
+              flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '13px',
               resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, overflow: 'hidden', minHeight: '22px',
             }}
           />
@@ -457,7 +451,7 @@ export default function Chat({ slug, projectId }) {
             onClick={sendMessage}
             disabled={isRunning || !input.trim()}
             style={{
-              background: isRunning || !input.trim() ? '#1a1d2e' : '#5b8af5',
+              background: isRunning || !input.trim() ? 'var(--btn-disabled-bg)' : 'var(--accent)',
               border: 'none', color: '#fff', borderRadius: '7px', padding: '6px 14px',
               cursor: isRunning || !input.trim() ? 'not-allowed' : 'pointer',
               fontSize: '13px', fontWeight: 600, alignSelf: 'flex-end', flexShrink: 0,

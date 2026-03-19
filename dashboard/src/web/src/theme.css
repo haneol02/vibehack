@@ -1,0 +1,206 @@
+/* Deep Dark Theme (default) */
+[data-theme="deep-dark"] {
+  --bg-primary: #08090e;
+  --bg-secondary: #0b0c15;
+  --bg-tertiary: #0c0d15;
+  --bg-elevated: #0d0e18;
+  --bg-nav: rgba(8,9,14,0.9);
+
+  --border-primary: #14162a;
+  --border-secondary: #1a1d2e;
+  --border-hover: #2a3050;
+  --border-focus: #3a4a7a;
+  --border-active: #1e2235;
+
+  --text-primary: #e8eaf0;
+  --text-heading: #f0f1f7;
+  --text-secondary: #c8ccd8;
+  --text-tertiary: #8892a4;
+  --text-muted: #484d5a;
+  --text-dimmed: #3e4358;
+  --text-faint: #252838;
+
+  --accent: #5b8af5;
+  --accent-bg: #1a2040;
+  --accent-border: #2a3a6a;
+  --accent-hover: #1e2240;
+  --gradient: linear-gradient(135deg, #5b8af5, #9b72f5);
+
+  --success: #3fb950;
+  --success-muted: #3a6b3a;
+  --success-border: #1a2a1a;
+  --success-border-hover: #2a5a2a;
+
+  --error: #e05050;
+  --error-muted: #6b3030;
+  --error-border: #2a1a1a;
+  --error-border-hover: #5a2020;
+  --error-bg-hover: #1a0a0a;
+
+  --user-bubble-bg: #1e2a50;
+  --user-bubble-border: #2a3a6a;
+  --user-bubble-text: #c8d8f8;
+
+  --code-bg: #1a1d2e;
+  --blockquote-border: #2a3a6a;
+
+  --card-icon-bg: linear-gradient(135deg, #1e2a50, #241a3a);
+  --card-icon-text: #7090d0;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #2e3244;
+  --log-stdout: #c8ccd8;
+  --log-stderr: #f85149;
+  --log-system: #8b8af5;
+
+  --btn-disabled-bg: #1a1d2e;
+  --input-border-active: #1e2240;
+  --status-stopped: #2e3244;
+
+  --scrollbar-track: #0b0c14;
+  --scrollbar-thumb: #1e2130;
+  --scrollbar-thumb-hover: #2a2d42;
+
+  --shadow-focus: rgba(91,138,245,0.07);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-primary: #1a1b26;
+  --bg-secondary: #1e2030;
+  --bg-tertiary: #222436;
+  --bg-elevated: #282a40;
+  --bg-nav: rgba(26,27,38,0.95);
+
+  --border-primary: #2e3148;
+  --border-secondary: #363958;
+  --border-hover: #4a4e70;
+  --border-focus: #5b6aaa;
+  --border-active: #3a3d58;
+
+  --text-primary: #e0e2f0;
+  --text-heading: #eaecf5;
+  --text-secondary: #b8bcd0;
+  --text-tertiary: #8890a8;
+  --text-muted: #5e6480;
+  --text-dimmed: #4a5070;
+  --text-faint: #363a52;
+
+  --accent: #6b96f8;
+  --accent-bg: #252a48;
+  --accent-border: #3a4878;
+  --accent-hover: #2a3050;
+  --gradient: linear-gradient(135deg, #6b96f8, #a080f5);
+
+  --success: #4ac460;
+  --success-muted: #3a7a45;
+  --success-border: #243828;
+  --success-border-hover: #2e5a35;
+
+  --error: #e86060;
+  --error-muted: #7a3838;
+  --error-border: #382424;
+  --error-border-hover: #6a3030;
+  --error-bg-hover: #2a1515;
+
+  --user-bubble-bg: #283258;
+  --user-bubble-border: #3a4878;
+  --user-bubble-text: #c8d8f8;
+
+  --code-bg: #252840;
+  --blockquote-border: #3a4878;
+
+  --card-icon-bg: linear-gradient(135deg, #283258, #302848);
+  --card-icon-text: #7890d0;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #404560;
+  --log-stdout: #b8bcd0;
+  --log-stderr: #f06050;
+  --log-system: #8b8af5;
+
+  --btn-disabled-bg: #2a2d40;
+  --input-border-active: #303558;
+  --status-stopped: #404560;
+
+  --scrollbar-track: #1e2030;
+  --scrollbar-thumb: #363958;
+  --scrollbar-thumb-hover: #4a4e70;
+
+  --shadow-focus: rgba(107,150,248,0.1);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-primary: #f5f6fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eef0f5;
+  --bg-elevated: #ffffff;
+  --bg-nav: rgba(255,255,255,0.95);
+
+  --border-primary: #dde0ea;
+  --border-secondary: #ccd0de;
+  --border-hover: #b0b5c8;
+  --border-focus: #7090d0;
+  --border-active: #c0c5d5;
+
+  --text-primary: #1a1c28;
+  --text-heading: #0d0e14;
+  --text-secondary: #3a3f52;
+  --text-tertiary: #5a6078;
+  --text-muted: #7a8098;
+  --text-dimmed: #9098b0;
+  --text-faint: #b8bcc8;
+
+  --accent: #4a78e0;
+  --accent-bg: #e8eef8;
+  --accent-border: #b0c4f0;
+  --accent-hover: #dce4f5;
+  --gradient: linear-gradient(135deg, #4a78e0, #8060d8);
+
+  --success: #2da44e;
+  --success-muted: #2da44e;
+  --success-border: #c8e8d0;
+  --success-border-hover: #a0d8b0;
+
+  --error: #d04040;
+  --error-muted: #c04040;
+  --error-border: #f0d0d0;
+  --error-border-hover: #e0a0a0;
+  --error-bg-hover: #fdf0f0;
+
+  --user-bubble-bg: #dce6f8;
+  --user-bubble-border: #b0c4f0;
+  --user-bubble-text: #1a2840;
+
+  --code-bg: #e8eaef;
+  --blockquote-border: #b0c4f0;
+
+  --card-icon-bg: linear-gradient(135deg, #dce6f8, #e8d8f8);
+  --card-icon-text: #4a68a0;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #9098b0;
+  --log-stdout: #3a3f52;
+  --log-stderr: #d04040;
+  --log-system: #6a60d0;
+
+  --btn-disabled-bg: #dde0ea;
+  --input-border-active: #b0c4f0;
+  --status-stopped: #b8bcc8;
+
+  --scrollbar-track: #eef0f5;
+  --scrollbar-thumb: #ccd0de;
+  --scrollbar-thumb-hover: #b0b5c8;
+
+  --shadow-focus: rgba(74,120,224,0.12);
+}
+
+/* Scrollbar theming */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }

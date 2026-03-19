@@ -38,7 +38,7 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const statusColor = (s) => s === 'running' ? '#3fb950' : '#2e3244';
+  const statusColor = (s) => s === 'running' ? 'var(--success)' : 'var(--status-stopped)';
   const statusLabel = (s) => s === 'running' ? '실행 중' : '중단됨';
 
   return (
@@ -49,24 +49,24 @@ export default function Dashboard() {
       <div style={{ textAlign: 'center', marginBottom: '56px' }}>
         <h1
           className="hero-title"
-          style={{ fontSize: 'clamp(24px, 3.5vw, 40px)', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: '12px', color: '#f0f1f7' }}
+          style={{ fontSize: 'clamp(24px, 3.5vw, 40px)', fontWeight: 800, lineHeight: 1.2, letterSpacing: '-1px', marginBottom: '12px', color: 'var(--text-heading)' }}
         >
           아이디어를{' '}
-          <span style={{ background: 'linear-gradient(135deg, #5b8af5, #9b72f5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <span style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             실행 가능한 앱으로
           </span>
         </h1>
-        <p style={{ color: '#3e4358', fontSize: '14px', lineHeight: 1.7, marginBottom: '28px' }}>
+        <p style={{ color: 'var(--text-dimmed)', fontSize: '14px', lineHeight: 1.7, marginBottom: '28px' }}>
           프로젝트 이름을 입력하면 AI가 환경을 구성하고 개발을 시작합니다.
         </p>
         <div style={{
           display: 'flex',
-          background: '#0c0d15',
-          border: `1px solid ${focused ? '#3a4a7a' : '#1a1d2e'}`,
+          background: 'var(--bg-tertiary)',
+          border: `1px solid ${focused ? 'var(--border-focus)' : 'var(--border-secondary)'}`,
           borderRadius: '12px',
           padding: '6px 6px 6px 18px',
           transition: 'border-color 0.2s',
-          boxShadow: focused ? '0 0 0 3px rgba(91,138,245,0.07)' : 'none',
+          boxShadow: focused ? '0 0 0 3px var(--shadow-focus)' : 'none',
           maxWidth: '520px',
           margin: '0 auto',
         }}>
@@ -77,13 +77,13 @@ export default function Dashboard() {
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="새 프로젝트 이름..."
-            style={{ background: 'none', border: 'none', outline: 'none', color: '#e8eaf0', fontSize: '15px', flex: 1, minWidth: 0, padding: '6px 0' }}
+            style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--text-primary)', fontSize: '15px', flex: 1, minWidth: 0, padding: '6px 0' }}
           />
           <button
             onClick={createProject}
             disabled={loading}
             style={{
-              background: loading ? '#1a1d2e' : '#5b8af5',
+              background: loading ? 'var(--btn-disabled-bg)' : 'var(--accent)',
               border: 'none', color: 'white', padding: '10px 20px', borderRadius: '8px',
               cursor: loading ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 600,
               whiteSpace: 'nowrap', flexShrink: 0, opacity: loading ? 0.5 : 1, transition: 'background 0.2s, opacity 0.2s',
@@ -98,7 +98,7 @@ export default function Dashboard() {
       {projects.length > 0 && (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '14px', fontWeight: 600, color: '#484d5a' }}>내 프로젝트 ({projects.length})</h2>
+            <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)' }}>내 프로젝트 ({projects.length})</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
             {projects.map(p => (
@@ -128,8 +128,8 @@ function ProjectCard({ project: p, onClick, onDelete, statusColor, statusLabel }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? '#0d0e18' : '#0b0c15',
-        border: `1px solid ${hovered ? '#2a3050' : '#14162a'}`,
+        background: hovered ? 'var(--bg-elevated)' : 'var(--bg-secondary)',
+        border: `1px solid ${hovered ? 'var(--border-hover)' : 'var(--border-primary)'}`,
         borderRadius: '10px', padding: '16px', cursor: 'pointer',
         transition: 'all 0.15s', position: 'relative',
       }}
@@ -137,9 +137,9 @@ function ProjectCard({ project: p, onClick, onDelete, statusColor, statusLabel }
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
         <div style={{
           width: '32px', height: '32px', borderRadius: '8px',
-          background: 'linear-gradient(135deg, #1e2a50, #241a3a)',
+          background: 'var(--card-icon-bg)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '13px', fontWeight: 700, color: '#7090d0',
+          fontSize: '13px', fontWeight: 700, color: 'var(--card-icon-text)',
         }}>
           {initial}
         </div>
@@ -149,15 +149,15 @@ function ProjectCard({ project: p, onClick, onDelete, statusColor, statusLabel }
         </span>
       </div>
 
-      <div style={{ fontWeight: 600, fontSize: '13px', color: '#c8ccd8', marginBottom: '3px' }}>{p.name}</div>
-      <div style={{ color: '#252838', fontSize: '11px', fontFamily: 'monospace', marginBottom: '12px' }}>{p.slug}</div>
+      <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '3px' }}>{p.name}</div>
+      <div style={{ color: 'var(--text-faint)', fontSize: '11px', fontFamily: 'monospace', marginBottom: '12px' }}>{p.slug}</div>
 
       <div style={{ display: 'flex', gap: '6px' }}>
         <button
           onClick={e => { e.stopPropagation(); onDelete(p.slug); }}
-          style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flex: 1, transition: 'all 0.15s' }}
-          onMouseEnter={e => { e.currentTarget.style.background = '#1a0a0a'; e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+          style={{ background: 'none', border: '1px solid var(--error-border)', color: 'var(--error-muted)', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flex: 1, transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--error-bg-hover)'; e.currentTarget.style.color = 'var(--error)'; e.currentTarget.style.borderColor = 'var(--error-border-hover)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--error-muted)'; e.currentTarget.style.borderColor = 'var(--error-border)'; }}
         >
           삭제
         </button>

@@ -25,10 +25,10 @@ export default function Login({ onLogin }) {
   };
 
   const inputStyle = (field) => ({
-    background: '#0c0d15',
-    border: `1px solid ${focusedField === field ? '#3a4a7a' : '#1a1d2e'}`,
+    background: 'var(--bg-tertiary)',
+    border: `1px solid ${focusedField === field ? 'var(--border-focus)' : 'var(--border-secondary)'}`,
     borderRadius: '8px',
-    color: '#e8eaf0',
+    color: 'var(--text-primary)',
     fontSize: '14px',
     padding: '10px 14px',
     outline: 'none',
@@ -40,15 +40,15 @@ export default function Login({ onLogin }) {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#08090e',
+      background: 'var(--bg-primary)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
     }}>
       <div style={{ width: '100%', maxWidth: '360px', padding: '0 24px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>
-            Vibe<span style={{ color: '#5b8af5' }}>Hack</span>
+          <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>
+            Vibe<span style={{ color: 'var(--accent)' }}>Hack</span>
           </div>
         </div>
 
@@ -75,14 +75,14 @@ export default function Login({ onLogin }) {
           />
 
           {error && (
-            <div style={{ color: '#e05050', fontSize: '12px', textAlign: 'center' }}>{error}</div>
+            <div style={{ color: 'var(--error)', fontSize: '12px', textAlign: 'center' }}>{error}</div>
           )}
 
           <button
             type="submit"
             disabled={loading}
             style={{
-              background: loading ? '#1a1d2e' : '#5b8af5',
+              background: loading ? 'var(--btn-disabled-bg)' : 'var(--accent)',
               border: 'none',
               color: 'white',
               padding: '11px',

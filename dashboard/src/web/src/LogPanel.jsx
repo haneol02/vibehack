@@ -53,23 +53,23 @@ export default function LogPanel({ slug, projectId }) {
   }, []);
 
   const streamColor = (s) => {
-    if (s === 'stderr') return '#f85149';
-    if (s === 'system') return '#8b8af5';
-    return '#c8ccd8';
+    if (s === 'stderr') return 'var(--log-stderr)';
+    if (s === 'system') return 'var(--log-system)';
+    return 'var(--log-stdout)';
   };
 
   const clearLogs = () => setLogs([]);
 
   return (
-    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: '#08090e' }}>
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
       {/* Header */}
-      <div style={{ padding: '8px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <span style={{ fontSize: '11px', color: '#484d5a' }}>
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
           {logs.length}줄
         </span>
         <button
           onClick={clearLogs}
-          style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
+          style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--text-muted)', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
         >
           지우기
         </button>
@@ -78,13 +78,13 @@ export default function LogPanel({ slug, projectId }) {
       {/* Log content */}
       <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', fontFamily: 'monospace', fontSize: '11px', lineHeight: 1.6, minHeight: 0 }}>
         {logs.length === 0 && (
-          <div style={{ color: '#252838', textAlign: 'center', marginTop: '40px', fontSize: '12px', fontFamily: 'inherit' }}>
+          <div style={{ color: 'var(--text-faint)', textAlign: 'center', marginTop: '40px', fontSize: '12px', fontFamily: 'inherit' }}>
             앱을 실행하면 로그가 여기에 표시됩니다
           </div>
         )}
         {logs.map((log, i) => (
           <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '1px' }}>
-            <span style={{ color: '#2e3244', flexShrink: 0, userSelect: 'none' }}>
+            <span style={{ color: 'var(--log-timestamp)', flexShrink: 0, userSelect: 'none' }}>
               {log.time ? new Date(log.time).toLocaleTimeString('ko-KR', { hour12: false }) : '--:--:--'}
             </span>
             <span style={{ color: streamColor(log.stream), wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>

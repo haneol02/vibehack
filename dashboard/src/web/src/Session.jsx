@@ -62,8 +62,8 @@ export default function Session({ slug }) {
   const tabStyle = (active) => ({
     background: 'none',
     border: 'none',
-    borderBottom: active ? '2px solid #5b8af5' : '2px solid transparent',
-    color: active ? '#c8ccd8' : '#3e4358',
+    borderBottom: active ? '2px solid var(--accent)' : '2px solid transparent',
+    color: active ? 'var(--text-secondary)' : 'var(--text-dimmed)',
     fontSize: '12px',
     fontWeight: 600,
     padding: '8px 16px',
@@ -74,53 +74,53 @@ export default function Session({ slug }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: '100%', overflow: 'hidden' }}>
       {/* Left: App preview */}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', borderRight: '1px solid #14162a' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden', borderRight: '1px solid var(--border-primary)' }}>
         {/* App control bar */}
-        <div style={{ padding: '10px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, background: '#0b0c15' }}>
+        <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0, background: 'var(--bg-secondary)' }}>
           <input
             value={startCmd}
             onChange={e => setStartCmd(e.target.value)}
-            style={{ background: '#08090e', border: '1px solid #1a1d2e', borderRadius: '6px', color: '#8892a4', padding: '5px 10px', fontSize: '12px', width: '160px', outline: 'none', fontFamily: 'monospace' }}
+            style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-secondary)', borderRadius: '6px', color: 'var(--text-tertiary)', padding: '5px 10px', fontSize: '12px', width: '160px', outline: 'none', fontFamily: 'monospace' }}
           />
           <a
             href={vscodeUrl}
             target="_blank"
             rel="noreferrer"
-            style={{ background: 'none', border: '1px solid #1a1d2e', color: '#5b8af5', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', textDecoration: 'none', flexShrink: 0 }}
+            style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--accent)', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', textDecoration: 'none', flexShrink: 0 }}
           >VS Code</a>
           <button onClick={clearCache}
-            style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flexShrink: 0 }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#8892a4'; e.currentTarget.style.borderColor = '#2a2d3e'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#484d5a'; e.currentTarget.style.borderColor = '#1a1d2e'; }}
+            style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--text-muted)', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flexShrink: 0 }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-hover)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border-secondary)'; }}
           >캐시 삭제</button>
           <button onClick={killAll}
-            style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flexShrink: 0 }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+            style={{ background: 'none', border: '1px solid var(--error-border)', color: 'var(--error-muted)', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px', flexShrink: 0 }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--error)'; e.currentTarget.style.borderColor = 'var(--error-border-hover)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--error-muted)'; e.currentTarget.style.borderColor = 'var(--error-border)'; }}
           >전체 초기화</button>
 
           {app?.status === 'running' ? (
             <>
-              <a href={appUrl} target="_blank" rel="noreferrer" style={{ color: '#3fb950', fontSize: '12px', textDecoration: 'none' }}>
+              <a href={appUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--success)', fontSize: '12px', textDecoration: 'none' }}>
                 {slug}.{domain}
               </a>
               <button onClick={stopApp}
-                style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
+                style={{ background: 'none', border: '1px solid var(--error-border)', color: 'var(--error-muted)', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--error)'; e.currentTarget.style.borderColor = 'var(--error-border-hover)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--error-muted)'; e.currentTarget.style.borderColor = 'var(--error-border)'; }}
               >중단</button>
             </>
           ) : (
             <button onClick={startApp}
-              style={{ background: 'none', border: '1px solid #1a2a1a', color: '#3a6b3a', padding: '4px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#3fb950'; e.currentTarget.style.borderColor = '#2a5a2a'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = '#3a6b3a'; e.currentTarget.style.borderColor = '#1a2a1a'; }}
+              style={{ background: 'none', border: '1px solid var(--success-border)', color: 'var(--success-muted)', padding: '4px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--success)'; e.currentTarget.style.borderColor = 'var(--success-border-hover)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--success-muted)'; e.currentTarget.style.borderColor = 'var(--success-border)'; }}
             >앱 실행</button>
           )}
         </div>
 
         {/* App iframe */}
-        <div style={{ flex: 1, position: 'relative', background: '#0b0c15' }}>
+        <div style={{ flex: 1, position: 'relative', background: 'var(--bg-secondary)' }}>
           {app?.status === 'running' ? (
             <iframe
               src={appUrl}
@@ -128,10 +128,10 @@ export default function Session({ slug }) {
               title="App Preview"
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#252838', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-faint)', gap: '12px' }}>
               <div style={{ fontSize: '32px' }}>🚀</div>
-              <div style={{ fontSize: '14px', color: '#3e4358' }}>앱이 실행되면 여기서 미리볼 수 있어요</div>
-              <div style={{ fontSize: '11px', color: '#252838' }}>우측 채팅에서 Claude에게 앱 만들기를 요청하세요</div>
+              <div style={{ fontSize: '14px', color: 'var(--text-dimmed)' }}>앱이 실행되면 여기서 미리볼 수 있어요</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-faint)' }}>우측 채팅에서 Claude에게 앱 만들기를 요청하세요</div>
             </div>
           )}
         </div>
@@ -140,7 +140,7 @@ export default function Session({ slug }) {
       {/* Right: Chat / Logs with tab switching */}
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
         {/* Tab bar */}
-        <div style={{ display: 'flex', borderBottom: '1px solid #14162a', flexShrink: 0, background: '#0b0c15' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-primary)', flexShrink: 0, background: 'var(--bg-secondary)' }}>
           <button onClick={() => setTab('chat')} style={tabStyle(tab === 'chat')}>
             채팅
           </button>
