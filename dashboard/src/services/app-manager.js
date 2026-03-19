@@ -54,6 +54,17 @@ export const appManager = {
 
     const projectRoot = findProjectRoot(`/projects/${projectSlug}`);
 
+    // Auto-install dependencies if node_modules doesn't exist but package.json does
+    if (existsSync(join(projectRoot, 'package.json')) && !existsSync(join(projectRoot, 'node_modules'))) {
+      try {
+        const { execSync } = await import('child_process');
+        console.log('[app-manager] Running npm install for', projectSlug);
+        execSync('npm install', { cwd: projectRoot, timeout: 120000, stdio: 'pipe' });
+      } catch (err) {
+        console.error('[app-manager] npm install failed:', err.message);
+      }
+    }
+
     // Auto-detect start command if using default 'npm start' but project lacks it
     if (startCommand === 'npm start') {
       try {

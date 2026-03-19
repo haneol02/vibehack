@@ -3,7 +3,98 @@ import { createInterface } from 'readline';
 import { db } from './db.js';
 import { eventBus } from './event-bus.js';
 import { v4 as uuidv4 } from 'uuid';
-import { mkdirSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
+
+const PLATFORM_MARKER_START = '<!-- VIBEHACK PLATFORM - DO NOT EDIT THIS SECTION -->';
+const PLATFORM_MARKER_END = '<!-- END VIBEHACK PLATFORM -->';
+
+function generatePlatformInfo(slug) {
+  const domain = process.env.DOMAIN || 'localhost';
+  return `${PLATFORM_MARKER_START}
+# Vibehack Platform
+
+## 환경 정보
+- OS: Linux (Docker 컨테이너)
+- 작업 디렉토리: /projects/${slug}
+- Node.js, npm 사용 가능
+- 앱 URL: https://${slug}.${domain}
+
+## ⚠️ 중요 규칙
+
+### 서버를 직접 실행하지 마세요
+- \`node server.js\`, \`npm start\`, \`npx vite\`, \`npm run dev\` 등 **서버 시작 명령을 실행하지 마세요**
+- 서버는 플랫폼의 **"앱 실행" 버튼**이 자동으로 시작합니다
+- 기본 실행 명령: \`npm start\` (사용자가 변경 가능)
+
+### 포트 설정
+- 서버 포트는 반드시 **\`process.env.PORT\`** 환경변수를 사용하세요
+- 예시: \`app.listen(process.env.PORT || 3000, '0.0.0.0')\`
+- **절대 포트를 하드코딩하지 마세요** (8080, 3000 등 고정 금지)
+- 플랫폼이 각 프로젝트에 고유 포트를 자동 할당합니다
+
+### 호스트 바인딩
+- 반드시 \`0.0.0.0\`에 바인딩하세요 (localhost ❌)
+- Express: \`app.listen(PORT, '0.0.0.0')\`
+- Vite: \`server: { host: '0.0.0.0', port: parseInt(process.env.PORT) || 3000 }\`
+- Next.js: package.json에 \`"start": "next start -H 0.0.0.0 -p $PORT"\`
+
+## 프로젝트 구조 요구사항
+\`\`\`
+/projects/${slug}/
+├── package.json          ← 필수: scripts.start 또는 scripts.dev 설정
+├── node_modules/         ← npm install로 설치
+├── CLAUDE.md             ← 이 파일 (플랫폼 정보)
+└── src/                  ← 소스 코드
+\`\`\`
+
+### package.json 필수 설정
+- \`npm install\`로 모든 의존성 설치 가능해야 함
+- \`scripts.start\` 또는 \`scripts.dev\`가 서버를 시작해야 함
+- 서버는 \`process.env.PORT\`를 사용해야 함
+
+### 예시 package.json
+\`\`\`json
+{
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vite --host"
+  }
+}
+\`\`\`
+
+### 예시 서버 코드
+\`\`\`javascript
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(\\\`Server running on port \\\${PORT}\\\`);
+});
+\`\`\`
+${PLATFORM_MARKER_END}`;
+}
+
+function updateClaudeMd(projectDir, slug) {
+  const filePath = `${projectDir}/CLAUDE.md`;
+  const platformInfo = generatePlatformInfo(slug);
+
+  if (!existsSync(filePath)) {
+    writeFileSync(filePath, platformInfo + '\n');
+    return;
+  }
+
+  const existing = readFileSync(filePath, 'utf8');
+  const startIdx = existing.indexOf(PLATFORM_MARKER_START);
+  const endIdx = existing.indexOf(PLATFORM_MARKER_END);
+
+  if (startIdx !== -1 && endIdx !== -1) {
+    // Replace existing platform section
+    const before = existing.slice(0, startIdx);
+    const after = existing.slice(endIdx + PLATFORM_MARKER_END.length);
+    writeFileSync(filePath, before + platformInfo + after);
+  } else {
+    // Prepend platform section
+    writeFileSync(filePath, platformInfo + '\n\n' + existing);
+  }
+}
 
 // Track running state per project slug
 const running = new Map();
@@ -33,6 +124,9 @@ export const claudeRunner = {
 
     const projectDir = `/projects/${slug}`;
     mkdirSync(projectDir, { recursive: true });
+
+    // Inject/update CLAUDE.md with platform info before every Claude run
+    updateClaudeMd(projectDir, slug);
 
     // Save user message
     const userMsgId = uuidv4();
