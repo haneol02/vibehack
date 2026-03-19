@@ -199,6 +199,408 @@
   --shadow-focus: rgba(74,120,224,0.12);
 }
 
+/* Hacker Theme - green on black */
+[data-theme="hacker"] {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #0f0f0f;
+  --bg-tertiary: #111111;
+  --bg-elevated: #141414;
+  --bg-nav: rgba(10,10,10,0.95);
+
+  --border-primary: #1a2a1a;
+  --border-secondary: #1e3a1e;
+  --border-hover: #2a5a2a;
+  --border-focus: #30a030;
+  --border-active: #1e3a1e;
+
+  --text-primary: #00ff41;
+  --text-heading: #33ff66;
+  --text-secondary: #00cc33;
+  --text-tertiary: #009922;
+  --text-muted: #006615;
+  --text-dimmed: #004d10;
+  --text-faint: #003308;
+
+  --accent: #00ff41;
+  --accent-bg: #0a1f0a;
+  --accent-border: #1a4a1a;
+  --accent-hover: #0f2a0f;
+  --gradient: linear-gradient(135deg, #00ff41, #00cc88);
+
+  --success: #00ff41;
+  --success-muted: #009922;
+  --success-border: #1a3a1a;
+  --success-border-hover: #2a5a2a;
+
+  --error: #ff3333;
+  --error-muted: #882222;
+  --error-border: #331111;
+  --error-border-hover: #662222;
+  --error-bg-hover: #1a0808;
+
+  --user-bubble-bg: #0a1f0a;
+  --user-bubble-border: #1a4a1a;
+  --user-bubble-text: #88ff88;
+
+  --code-bg: #0f1a0f;
+  --blockquote-border: #1a4a1a;
+
+  --card-icon-bg: linear-gradient(135deg, #0a1f0a, #0a200f);
+  --card-icon-text: #00cc33;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #004d10;
+  --log-stdout: #00cc33;
+  --log-stderr: #ff3333;
+  --log-system: #00ff41;
+
+  --btn-disabled-bg: #1a2a1a;
+  --input-border-active: #1a4a1a;
+  --status-stopped: #003308;
+
+  --scrollbar-track: #0a0a0a;
+  --scrollbar-thumb: #1a3a1a;
+  --scrollbar-thumb-hover: #2a5a2a;
+
+  --shadow-focus: rgba(0,255,65,0.1);
+}
+
+/* Cyberpunk Theme - neon pink/cyan */
+[data-theme="cyberpunk"] {
+  --bg-primary: #0d0221;
+  --bg-secondary: #120330;
+  --bg-tertiary: #150438;
+  --bg-elevated: #1a0540;
+  --bg-nav: rgba(13,2,33,0.95);
+
+  --border-primary: #2a0a50;
+  --border-secondary: #3a1060;
+  --border-hover: #5a1888;
+  --border-focus: #ff2a6d;
+  --border-active: #3a1060;
+
+  --text-primary: #f0e0ff;
+  --text-heading: #ffffff;
+  --text-secondary: #d0b0f0;
+  --text-tertiary: #9070c0;
+  --text-muted: #6040a0;
+  --text-dimmed: #4a2880;
+  --text-faint: #2a1050;
+
+  --accent: #ff2a6d;
+  --accent-bg: #2a0828;
+  --accent-border: #5a1040;
+  --accent-hover: #3a0a30;
+  --gradient: linear-gradient(135deg, #ff2a6d, #05d9e8);
+
+  --success: #05d9e8;
+  --success-muted: #0490a0;
+  --success-border: #082a30;
+  --success-border-hover: #0a4a58;
+
+  --error: #ff2a6d;
+  --error-muted: #a01848;
+  --error-border: #3a0820;
+  --error-border-hover: #6a1038;
+  --error-bg-hover: #200510;
+
+  --user-bubble-bg: #2a0828;
+  --user-bubble-border: #5a1040;
+  --user-bubble-text: #f0c0e0;
+
+  --code-bg: #1a0540;
+  --blockquote-border: #ff2a6d;
+
+  --card-icon-bg: linear-gradient(135deg, #2a0828, #0a1838);
+  --card-icon-text: #05d9e8;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #4a2880;
+  --log-stdout: #d0b0f0;
+  --log-stderr: #ff2a6d;
+  --log-system: #05d9e8;
+
+  --btn-disabled-bg: #2a0a50;
+  --input-border-active: #5a1040;
+  --status-stopped: #2a1050;
+
+  --scrollbar-track: #0d0221;
+  --scrollbar-thumb: #3a1060;
+  --scrollbar-thumb-hover: #5a1888;
+
+  --shadow-focus: rgba(255,42,109,0.15);
+}
+
+/* Solarized Dark Theme */
+[data-theme="solarized"] {
+  --bg-primary: #002b36;
+  --bg-secondary: #073642;
+  --bg-tertiary: #073642;
+  --bg-elevated: #0a3d4a;
+  --bg-nav: rgba(0,43,54,0.95);
+
+  --border-primary: #0a4050;
+  --border-secondary: #0d4d5e;
+  --border-hover: #1a6070;
+  --border-focus: #268bd2;
+  --border-active: #0d4d5e;
+
+  --text-primary: #93a1a1;
+  --text-heading: #eee8d5;
+  --text-secondary: #839496;
+  --text-tertiary: #657b83;
+  --text-muted: #586e75;
+  --text-dimmed: #4a6068;
+  --text-faint: #2a4048;
+
+  --accent: #268bd2;
+  --accent-bg: #073848;
+  --accent-border: #0a5070;
+  --accent-hover: #084050;
+  --gradient: linear-gradient(135deg, #268bd2, #2aa198);
+
+  --success: #859900;
+  --success-muted: #5a6600;
+  --success-border: #1a2200;
+  --success-border-hover: #2a3800;
+
+  --error: #dc322f;
+  --error-muted: #8a2020;
+  --error-border: #3a1010;
+  --error-border-hover: #5a1818;
+  --error-bg-hover: #1a0808;
+
+  --user-bubble-bg: #073848;
+  --user-bubble-border: #0a5070;
+  --user-bubble-text: #93a1a1;
+
+  --code-bg: #073642;
+  --blockquote-border: #268bd2;
+
+  --card-icon-bg: linear-gradient(135deg, #073848, #0a3040);
+  --card-icon-text: #2aa198;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #4a6068;
+  --log-stdout: #839496;
+  --log-stderr: #dc322f;
+  --log-system: #268bd2;
+
+  --btn-disabled-bg: #0a4050;
+  --input-border-active: #0a5070;
+  --status-stopped: #2a4048;
+
+  --scrollbar-track: #002b36;
+  --scrollbar-thumb: #0a4050;
+  --scrollbar-thumb-hover: #1a6070;
+
+  --shadow-focus: rgba(38,139,210,0.15);
+}
+
+/* Pastel Theme - soft colorful */
+[data-theme="pastel"] {
+  --bg-primary: #faf0f5;
+  --bg-secondary: #fff5f8;
+  --bg-tertiary: #f5eaf0;
+  --bg-elevated: #ffffff;
+  --bg-nav: rgba(250,240,245,0.95);
+
+  --border-primary: #f0d8e8;
+  --border-secondary: #e8c8e0;
+  --border-hover: #d8a8d0;
+  --border-focus: #c088c0;
+  --border-active: #e8c8e0;
+
+  --text-primary: #4a3050;
+  --text-heading: #3a2040;
+  --text-secondary: #5a4060;
+  --text-tertiary: #7a6088;
+  --text-muted: #9a80a8;
+  --text-dimmed: #b8a0c0;
+  --text-faint: #d8c0d8;
+
+  --accent: #c06ab0;
+  --accent-bg: #f8e0f0;
+  --accent-border: #e8b0d8;
+  --accent-hover: #f0d0e8;
+  --gradient: linear-gradient(135deg, #c06ab0, #6ab0e0);
+
+  --success: #60b880;
+  --success-muted: #60b880;
+  --success-border: #c0e8d0;
+  --success-border-hover: #a0d8b8;
+
+  --error: #e06080;
+  --error-muted: #d06878;
+  --error-border: #f8d0d8;
+  --error-border-hover: #f0b0c0;
+  --error-bg-hover: #fef0f2;
+
+  --user-bubble-bg: #e8d0f0;
+  --user-bubble-border: #d8b0e0;
+  --user-bubble-text: #4a2860;
+
+  --code-bg: #f0e0f0;
+  --blockquote-border: #d8b0e0;
+
+  --card-icon-bg: linear-gradient(135deg, #e8d0f0, #d0e0f8);
+  --card-icon-text: #8060a0;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #b8a0c0;
+  --log-stdout: #5a4060;
+  --log-stderr: #e06080;
+  --log-system: #8060c0;
+
+  --btn-disabled-bg: #e8d0e0;
+  --input-border-active: #d8b0e0;
+  --status-stopped: #d8c0d8;
+
+  --scrollbar-track: #f5eaf0;
+  --scrollbar-thumb: #e8c8e0;
+  --scrollbar-thumb-hover: #d8a8d0;
+
+  --shadow-focus: rgba(192,106,176,0.12);
+}
+
+/* Ocean Theme - deep blue */
+[data-theme="ocean"] {
+  --bg-primary: #0a1628;
+  --bg-secondary: #0e1e35;
+  --bg-tertiary: #122440;
+  --bg-elevated: #162a48;
+  --bg-nav: rgba(10,22,40,0.95);
+
+  --border-primary: #1a3050;
+  --border-secondary: #203a5a;
+  --border-hover: #304a70;
+  --border-focus: #4090d0;
+  --border-active: #203a5a;
+
+  --text-primary: #d0e0f0;
+  --text-heading: #e8f0ff;
+  --text-secondary: #a0c0e0;
+  --text-tertiary: #7098c0;
+  --text-muted: #4a70a0;
+  --text-dimmed: #3a5888;
+  --text-faint: #203858;
+
+  --accent: #40a0e0;
+  --accent-bg: #102840;
+  --accent-border: #1a4068;
+  --accent-hover: #183048;
+  --gradient: linear-gradient(135deg, #40a0e0, #60d0a0);
+
+  --success: #40c890;
+  --success-muted: #2a9060;
+  --success-border: #103828;
+  --success-border-hover: #185840;
+
+  --error: #e06060;
+  --error-muted: #a04040;
+  --error-border: #3a1818;
+  --error-border-hover: #5a2828;
+  --error-bg-hover: #1a0a0a;
+
+  --user-bubble-bg: #102840;
+  --user-bubble-border: #1a4068;
+  --user-bubble-text: #a0d0f0;
+
+  --code-bg: #0e1e35;
+  --blockquote-border: #1a4068;
+
+  --card-icon-bg: linear-gradient(135deg, #102840, #0a2030);
+  --card-icon-text: #40a0e0;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #3a5888;
+  --log-stdout: #a0c0e0;
+  --log-stderr: #e06060;
+  --log-system: #40a0e0;
+
+  --btn-disabled-bg: #1a3050;
+  --input-border-active: #1a4068;
+  --status-stopped: #203858;
+
+  --scrollbar-track: #0a1628;
+  --scrollbar-thumb: #1a3050;
+  --scrollbar-thumb-hover: #304a70;
+
+  --shadow-focus: rgba(64,160,224,0.12);
+}
+
+/* Sunset Theme - warm orange/red */
+[data-theme="sunset"] {
+  --bg-primary: #1a1010;
+  --bg-secondary: #221515;
+  --bg-tertiary: #281818;
+  --bg-elevated: #2e1c1c;
+  --bg-nav: rgba(26,16,16,0.95);
+
+  --border-primary: #3a2020;
+  --border-secondary: #482828;
+  --border-hover: #6a3838;
+  --border-focus: #e08040;
+  --border-active: #482828;
+
+  --text-primary: #f0dcd0;
+  --text-heading: #f8ece0;
+  --text-secondary: #d8b8a0;
+  --text-tertiary: #b09080;
+  --text-muted: #886858;
+  --text-dimmed: #684840;
+  --text-faint: #3a2820;
+
+  --accent: #e08040;
+  --accent-bg: #2a1808;
+  --accent-border: #5a3018;
+  --accent-hover: #382010;
+  --gradient: linear-gradient(135deg, #e08040, #e04080);
+
+  --success: #80c040;
+  --success-muted: #508028;
+  --success-border: #283810;
+  --success-border-hover: #385818;
+
+  --error: #e04040;
+  --error-muted: #a02828;
+  --error-border: #3a1818;
+  --error-border-hover: #5a2020;
+  --error-bg-hover: #1a0808;
+
+  --user-bubble-bg: #2a1808;
+  --user-bubble-border: #5a3018;
+  --user-bubble-text: #f0d0a0;
+
+  --code-bg: #281818;
+  --blockquote-border: #5a3018;
+
+  --card-icon-bg: linear-gradient(135deg, #2a1808, #2a1018);
+  --card-icon-text: #e08040;
+
+  --discord-bg: #5865f2;
+
+  --log-timestamp: #684840;
+  --log-stdout: #d8b8a0;
+  --log-stderr: #e04040;
+  --log-system: #e08040;
+
+  --btn-disabled-bg: #3a2020;
+  --input-border-active: #5a3018;
+  --status-stopped: #3a2820;
+
+  --scrollbar-track: #1a1010;
+  --scrollbar-thumb: #3a2020;
+  --scrollbar-thumb-hover: #6a3838;
+
+  --shadow-focus: rgba(224,128,64,0.12);
+}
+
 /* Scrollbar theming */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }

@@ -3,9 +3,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 const THEMES = [
-  { id: 'deep-dark', label: 'Deep Dark' },
-  { id: 'dark', label: 'Dark' },
-  { id: 'light', label: 'Light' },
+  { id: 'deep-dark', label: 'Deep Dark', emoji: '🌑' },
+  { id: 'dark', label: 'Dark', emoji: '🌙' },
+  { id: 'light', label: 'Light', emoji: '☀️' },
+  { id: 'hacker', label: 'Hacker', emoji: '💚' },
+  { id: 'cyberpunk', label: 'Cyberpunk', emoji: '🌸' },
+  { id: 'solarized', label: 'Solarized', emoji: '🔵' },
+  { id: 'pastel', label: 'Pastel', emoji: '🍬' },
+  { id: 'ocean', label: 'Ocean', emoji: '🌊' },
+  { id: 'sunset', label: 'Sunset', emoji: '🌅' },
 ];
 
 export function ThemeProvider({ children }) {

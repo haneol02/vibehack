@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import Dashboard from './Dashboard.jsx';
 import Session from './Session.jsx';
@@ -7,25 +7,55 @@ import { useTheme } from './ThemeContext.jsx';
 
 function ThemeSwitcher() {
   const { theme, setTheme, THEMES } = useTheme();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const current = THEMES.find(t => t.id === theme) || THEMES[0];
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   return (
-    <div style={{ display: 'flex', gap: '2px', background: 'var(--bg-primary)', borderRadius: '6px', padding: '2px', border: '1px solid var(--border-secondary)' }}>
-      {THEMES.map(t => (
-        <button
-          key={t.id}
-          onClick={() => setTheme(t.id)}
-          style={{
-            background: theme === t.id ? 'var(--accent-bg)' : 'none',
-            border: 'none',
-            color: theme === t.id ? 'var(--accent)' : 'var(--text-muted)',
-            fontSize: '11px',
-            padding: '3px 8px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'all 0.15s',
-            fontWeight: theme === t.id ? 600 : 400,
-          }}
-        >{t.label}</button>
-      ))}
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          background: 'var(--bg-primary)', border: '1px solid var(--border-secondary)',
+          color: 'var(--text-secondary)', fontSize: '12px', padding: '4px 10px',
+          borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px',
+        }}
+      >
+        {current.emoji} {current.label} <span style={{ fontSize: '8px', color: 'var(--text-muted)' }}>▼</span>
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', right: 0, marginTop: '4px',
+          background: 'var(--bg-secondary)', border: '1px solid var(--border-secondary)',
+          borderRadius: '8px', padding: '4px', minWidth: '160px', zIndex: 200,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+        }}>
+          {THEMES.map(t => (
+            <button
+              key={t.id}
+              onClick={() => { setTheme(t.id); setOpen(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px', width: '100%',
+                background: theme === t.id ? 'var(--accent-bg)' : 'none',
+                border: 'none', color: theme === t.id ? 'var(--accent)' : 'var(--text-secondary)',
+                fontSize: '12px', padding: '6px 10px', borderRadius: '5px',
+                cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s',
+              }}
+              onMouseEnter={e => { if (theme !== t.id) e.currentTarget.style.background = 'var(--bg-elevated)'; }}
+              onMouseLeave={e => { if (theme !== t.id) e.currentTarget.style.background = 'none'; }}
+            >
+              <span>{t.emoji}</span>
+              <span style={{ fontWeight: theme === t.id ? 600 : 400 }}>{t.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
