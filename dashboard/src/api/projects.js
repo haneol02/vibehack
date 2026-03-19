@@ -9,9 +9,9 @@ const router = Router();
 
 router.get('/', (req, res) => {
   const projects = db.prepare(`
-    SELECT p.*, s.status as session_status
+    SELECT p.*, a.status as app_status
     FROM projects p
-    LEFT JOIN sessions s ON s.project_id = p.id AND s.status = 'running'
+    LEFT JOIN apps a ON a.project_id = p.id AND a.status = 'running'
     WHERE p.status != 'archived'
     ORDER BY p.created_at DESC
   `).all();

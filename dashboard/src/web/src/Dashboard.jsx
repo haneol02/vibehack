@@ -143,9 +143,9 @@ function ProjectCard({ project: p, onClick, onDelete, statusColor, statusLabel }
         }}>
           {initial}
         </div>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: statusColor(p.session_status), fontWeight: 500 }}>
-          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: statusColor(p.session_status), flexShrink: 0 }} />
-          {statusLabel(p.session_status)}
+        <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: statusColor(p.app_status), fontWeight: 500 }}>
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: statusColor(p.app_status), flexShrink: 0 }} />
+          {statusLabel(p.app_status)}
         </span>
       </div>
 
