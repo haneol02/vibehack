@@ -38,6 +38,11 @@ function getNextAppPort(usedPorts) {
   throw new Error('No available app ports');
 }
 
+function killProcessGroup(pid) {
+  try { process.kill(-pid, 'SIGKILL'); } catch {}
+  try { process.kill(pid, 'SIGKILL'); } catch {}
+}
+
 export const appManager = {
   async start(projectId, projectSlug, startCommand = 'npm start', appPort = 3000) {
     const apps = db.prepare('SELECT port FROM apps WHERE status = ?').all('running');
@@ -47,15 +52,17 @@ export const appManager = {
     // Kill existing process for this slug if any
     const existing = db.prepare('SELECT * FROM apps WHERE project_id = ? AND status = ?').get(projectId, 'running');
     if (existing) {
-      try {
-        const proc = processes.get(Number(existing.container_id));
-        if (proc) proc.kill();
-        processes.delete(Number(existing.container_id));
-      } catch {}
+      const pid = Number(existing.container_id);
+      const proc = processes.get(pid);
+      if (proc) killProcessGroup(proc.pid);
+      processes.delete(pid);
+      // Also kill anything on the old port
+      try { const { execSync } = await import('child_process'); execSync(`fuser -k ${existing.port}/tcp`, { timeout: 3000, stdio: 'pipe' }); } catch {}
       db.prepare('UPDATE apps SET status = ? WHERE id = ?').run('stopped', existing.id);
     }
 
     const projectRoot = findProjectRoot(`/projects/${projectSlug}`);
+    console.log(`[app-manager] Starting ${projectSlug}: root=${projectRoot}, port=${port}, cmd="${startCommand}"`);
 
     // Auto-install dependencies if node_modules doesn't exist but package.json does
     if (existsSync(join(projectRoot, 'package.json')) && !existsSync(join(projectRoot, 'node_modules'))) {
@@ -83,7 +90,8 @@ export const appManager = {
     const proc = spawn('/bin/sh', ['-c', startCommand], {
       cwd: projectRoot,
       env: { ...process.env, PORT: String(port) },
-      detached: false,
+      detached: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     processes.set(proc.pid, proc);
@@ -133,6 +141,33 @@ export const appManager = {
     return appLogs.get(slug) || [];
   },
 
+  async killPort(port) {
+    const { execSync } = await import('child_process');
+    try {
+      execSync(`fuser -k ${port}/tcp`, { timeout: 5000, stdio: 'pipe' });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  async killAllApps() {
+    // Kill all tracked processes
+    for (const [pid, proc] of processes) {
+      try { proc.kill('SIGKILL'); } catch {}
+      processes.delete(pid);
+    }
+    // Kill anything on app port range
+    const { execSync } = await import('child_process');
+    for (let p = APP_BASE_PORT; p < APP_BASE_PORT + MAX_APPS; p++) {
+      try { execSync(`fuser -k ${p}/tcp`, { timeout: 3000, stdio: 'pipe' }); } catch {}
+    }
+    // Reset DB
+    db.prepare("UPDATE apps SET status = 'stopped' WHERE status = 'running'").run();
+    appLogs.clear();
+    return true;
+  },
+
   async clearCache(projectSlug) {
     const projectRoot = findProjectRoot(`/projects/${projectSlug}`);
     const { execSync } = await import('child_process');
@@ -152,11 +187,12 @@ export const appManager = {
     const app = db.prepare('SELECT * FROM apps WHERE project_id = ? AND status = ?').get(projectId, 'running');
     if (!app) return null;
 
-    try {
-      const proc = processes.get(Number(app.container_id));
-      if (proc) proc.kill();
-      processes.delete(Number(app.container_id));
-    } catch {}
+    const pid = Number(app.container_id);
+    const proc = processes.get(pid);
+    if (proc) killProcessGroup(proc.pid);
+    processes.delete(pid);
+    // Also kill anything left on the port
+    try { const { execSync } = await import('child_process'); execSync(`fuser -k ${app.port}/tcp`, { timeout: 3000, stdio: 'pipe' }); } catch {}
 
     db.prepare('UPDATE apps SET status = ? WHERE id = ?').run('stopped', app.id);
     eventBus.publish('app.stopped', { projectSlug }, projectId);
