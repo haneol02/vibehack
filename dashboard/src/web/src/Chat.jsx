@@ -12,22 +12,33 @@ function MarkdownContent({ children }) {
       components={{
         code({ node, inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
-          return !inline && match ? (
-            <SyntaxHighlighter
-              style={vscDarkPlus}
-              language={match[1]}
-              PreTag="div"
-              customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}
-              {...props}
-            >
-              {String(children).replace(/\n$/, '')}
-            </SyntaxHighlighter>
-          ) : (
+          if (!inline && match) {
+            return (
+              <SyntaxHighlighter
+                style={vscDarkPlus}
+                language={match[1]}
+                PreTag="div"
+                customStyle={{ margin: '8px 0', borderRadius: '6px', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}
+                {...props}
+              >
+                {String(children).replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            );
+          }
+          if (!inline) {
+            return (
+              <pre style={{ background: '#1a1d2e', borderRadius: '6px', padding: '8px 12px', margin: '8px 0', fontSize: '12px', overflowX: 'auto', maxWidth: '100%' }}>
+                <code style={{ fontFamily: 'monospace' }} {...props}>{children}</code>
+              </pre>
+            );
+          }
+          return (
             <code style={{ background: '#1a1d2e', padding: '1px 5px', borderRadius: '3px', fontSize: '12px', fontFamily: 'monospace' }} {...props}>
               {children}
             </code>
           );
         },
+        pre({ children }) { return <>{children}</>; },
         p({ children }) { return <p style={{ margin: '4px 0' }}>{children}</p>; },
         ul({ children }) { return <ul style={{ margin: '4px 0', paddingLeft: '20px' }}>{children}</ul>; },
         ol({ children }) { return <ol style={{ margin: '4px 0', paddingLeft: '20px' }}>{children}</ol>; },
@@ -167,7 +178,7 @@ function StreamingMessage({ text, tools }) {
         <div style={{
           background: '#0d0e18', border: '1px solid #14162a',
           borderRadius: '12px 12px 12px 4px', padding: '10px 14px',
-          maxWidth: '90%', minWidth: 0, fontSize: '13px', lineHeight: 1.6,
+          maxWidth: '90%', minWidth: 0, overflow: 'hidden', fontSize: '13px', lineHeight: 1.6,
           color: '#c8ccd8', wordBreak: 'break-word',
         }}>
           <MarkdownContent>{text}</MarkdownContent><span style={{ opacity: 0.5 }}>▊</span>
@@ -281,13 +292,8 @@ export default function Chat({ slug, projectId }) {
             });
           }
         } else if (event.type === 'chat.delta') {
-          const newText = event.data?.text || '';
-          streamBufferRef.current += newText;
-          let i = 0;
-          const interval = setInterval(() => {
-            if (i >= newText.length) { clearInterval(interval); return; }
-            setStreamText(prev => prev + newText[i++]);
-          }, 8);
+          streamBufferRef.current += (event.data?.text || '');
+          setStreamText(streamBufferRef.current);
         } else if (event.type === 'chat.tool') {
           streamToolsRef.current = [...streamToolsRef.current, event.data];
           setStreamTools(streamToolsRef.current);
