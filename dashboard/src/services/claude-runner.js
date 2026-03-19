@@ -197,7 +197,11 @@ export const claudeRunner = {
         });
 
         let stderrData = '';
-        proc.stderr.on('data', (d) => { stderrData += d.toString(); });
+        proc.stderr.on('data', (d) => {
+          const chunk = d.toString();
+          stderrData += chunk;
+          chunk.split('\n').filter(l => l.trim()).forEach(l => console.log(`[claude:${slug}]`, l));
+        });
 
         proc.on('close', (code) => {
           console.log('[claude-runner] claude exited code:', code, 'stderr:', stderrData.slice(0, 200));
