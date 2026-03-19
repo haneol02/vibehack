@@ -366,10 +366,9 @@ export default function Chat({ slug, projectId }) {
       {/* Header */}
       <div style={{ padding: '12px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '12px', color: '#484d5a', fontWeight: 600 }}>채팅</span>
           {isRunning && (
             <span style={{ fontSize: '10px', background: '#1a2040', color: '#5b8af5', borderRadius: '4px', padding: '2px 6px' }}>
-              작업 중
+              Claude 작업 중
             </span>
           )}
         </div>

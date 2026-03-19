@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Chat from './Chat.jsx';
+import LogPanel from './LogPanel.jsx';
 
 export default function Session({ slug }) {
   const [project, setProject] = useState(null);
   const [app, setApp] = useState(null);
   const [startCmd, setStartCmd] = useState('npm start');
+  const [tab, setTab] = useState('chat');
   const domain = window.location.hostname;
 
   useEffect(() => {
@@ -42,6 +44,18 @@ export default function Session({ slug }) {
   const appUrl = `${proto}//${slug}.${domain}`;
   const vscodeUrl = `${proto}//vscode-vibehack.haneol.kr/?folder=/home/coder/projects/${slug}`;
 
+  const tabStyle = (active) => ({
+    background: 'none',
+    border: 'none',
+    borderBottom: active ? '2px solid #5b8af5' : '2px solid transparent',
+    color: active ? '#c8ccd8' : '#3e4358',
+    fontSize: '12px',
+    fontWeight: 600,
+    padding: '8px 16px',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  });
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', height: '100%', overflow: 'hidden' }}>
       {/* Left: App preview */}
@@ -58,25 +72,25 @@ export default function Session({ slug }) {
             target="_blank"
             rel="noreferrer"
             style={{ background: 'none', border: '1px solid #1a1d2e', color: '#5b8af5', padding: '4px 10px', borderRadius: '5px', fontSize: '11px', textDecoration: 'none', flexShrink: 0 }}
-          >⌨ VS Code</a>
+          >VS Code</a>
 
           {app?.status === 'running' ? (
             <>
               <a href={appUrl} target="_blank" rel="noreferrer" style={{ color: '#3fb950', fontSize: '12px', textDecoration: 'none' }}>
-                ● {slug}.{domain}
+                {slug}.{domain}
               </a>
               <button onClick={stopApp}
                 style={{ background: 'none', border: '1px solid #2a1a1a', color: '#6b3030', padding: '4px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
                 onMouseEnter={e => { e.currentTarget.style.color = '#e05050'; e.currentTarget.style.borderColor = '#5a2020'; }}
                 onMouseLeave={e => { e.currentTarget.style.color = '#6b3030'; e.currentTarget.style.borderColor = '#2a1a1a'; }}
-              >⏹ 중단</button>
+              >중단</button>
             </>
           ) : (
             <button onClick={startApp}
               style={{ background: 'none', border: '1px solid #1a2a1a', color: '#3a6b3a', padding: '4px 12px', borderRadius: '5px', cursor: 'pointer', fontSize: '11px' }}
               onMouseEnter={e => { e.currentTarget.style.color = '#3fb950'; e.currentTarget.style.borderColor = '#2a5a2a'; }}
               onMouseLeave={e => { e.currentTarget.style.color = '#3a6b3a'; e.currentTarget.style.borderColor = '#1a2a1a'; }}
-            >▶ 앱 실행</button>
+            >앱 실행</button>
           )}
         </div>
 
@@ -98,8 +112,28 @@ export default function Session({ slug }) {
         </div>
       </div>
 
-      {/* Right: Chat */}
-      <Chat slug={slug} projectId={project?.id} />
+      {/* Right: Chat / Logs with tab switching */}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        {/* Tab bar */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #14162a', flexShrink: 0, background: '#0b0c15' }}>
+          <button onClick={() => setTab('chat')} style={tabStyle(tab === 'chat')}>
+            채팅
+          </button>
+          <button onClick={() => setTab('logs')} style={tabStyle(tab === 'logs')}>
+            로그
+          </button>
+        </div>
+
+        {/* Tab content */}
+        <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
+          <div style={{ position: 'absolute', inset: 0, display: tab === 'chat' ? 'block' : 'none' }}>
+            <Chat slug={slug} projectId={project?.id} />
+          </div>
+          <div style={{ position: 'absolute', inset: 0, display: tab === 'logs' ? 'block' : 'none' }}>
+            <LogPanel slug={slug} projectId={project?.id} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

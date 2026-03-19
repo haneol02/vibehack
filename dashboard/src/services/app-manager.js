@@ -24,6 +24,9 @@ const MAX_APPS = 20;
 
 // pid → child process reference
 const processes = new Map();
+// slug → log lines (circular buffer)
+const appLogs = new Map();
+const MAX_LOG_LINES = 500;
 
 // On startup, reset any stale 'running' apps (orphaned from previous process)
 db.prepare("UPDATE apps SET status = 'stopped' WHERE status = 'running'").run();
@@ -85,8 +88,26 @@ export const appManager = {
 
     processes.set(proc.pid, proc);
 
-    proc.on('exit', () => {
+    // Capture stdout/stderr logs
+    const logs = [];
+    appLogs.set(projectSlug, logs);
+    const appendLog = (stream, data) => {
+      const lines = data.toString().split('\n').filter(l => l.length > 0);
+      for (const line of lines) {
+        const entry = { time: Date.now(), stream, text: line };
+        logs.push(entry);
+        if (logs.length > MAX_LOG_LINES) logs.shift();
+        eventBus.publish('app.log', { stream, text: line }, projectId);
+      }
+    };
+    proc.stdout.on('data', d => appendLog('stdout', d));
+    proc.stderr.on('data', d => appendLog('stderr', d));
+
+    proc.on('exit', (code) => {
       processes.delete(proc.pid);
+      const entry = { time: Date.now(), stream: 'system', text: `Process exited with code ${code}` };
+      logs.push(entry);
+      eventBus.publish('app.log', entry, projectId);
       db.prepare('UPDATE apps SET status = ? WHERE container_id = ?').run('stopped', String(proc.pid));
       eventBus.publish('app.stopped', { projectSlug }, projectId);
     });
@@ -106,6 +127,10 @@ export const appManager = {
     eventBus.publish('app.started', { projectSlug, subdomain, url, port }, projectId);
 
     return { appId, port, subdomain, url, status: 'running' };
+  },
+
+  getLogs(slug) {
+    return appLogs.get(slug) || [];
   },
 
   async stop(projectId, projectSlug) {

@@ -1,48 +1,94 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function LogPanel({ slug }) {
-  const [events, setEvents] = useState([]);
+export default function LogPanel({ slug, projectId }) {
+  const [logs, setLogs] = useState([]);
   const bottomRef = useRef(null);
+  const autoScrollRef = useRef(true);
+  const containerRef = useRef(null);
 
+  // Load existing logs on mount
   useEffect(() => {
-    const es = new EventSource(`/api/events/stream?projectId=${slug}`);
+    fetch(`/api/apps/${slug}/logs`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setLogs(data); })
+      .catch(() => {});
+  }, [slug]);
 
+  // Listen for new logs via SSE
+  useEffect(() => {
+    if (!projectId) return;
+    const es = new EventSource(`/api/events/stream?projectId=${projectId}`);
     es.onmessage = (e) => {
       try {
         const event = JSON.parse(e.data);
-        setEvents(prev => [...prev.slice(-200), event]);
+        if (event.type === 'app.log') {
+          setLogs(prev => {
+            const next = [...prev, event.data];
+            return next.length > 500 ? next.slice(-500) : next;
+          });
+        } else if (event.type === 'app.started') {
+          setLogs([{ time: Date.now(), stream: 'system', text: `App started (port ${event.data?.port})` }]);
+        }
       } catch {}
     };
-
     return () => es.close();
-  }, [slug]);
+  }, [projectId]);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (autoScrollRef.current) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [events]);
+    const el = containerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      autoScrollRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
 
-  const typeColor = {
-    'session.created': '#58a6ff',
-    'session.stopped': '#f85149',
-    'app.started': '#3fb950',
-    'app.stopped': '#f85149',
-    'claude.message': '#d2a8ff',
+  const streamColor = (s) => {
+    if (s === 'stderr') return '#f85149';
+    if (s === 'system') return '#8b8af5';
+    return '#c8ccd8';
   };
 
+  const clearLogs = () => setLogs([]);
+
   return (
-    <div style={{ flex: 1, background: '#161b22', border: '1px solid #30363d', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid #30363d', fontSize: '13px', color: '#8b949e' }}>
-        이벤트 로그
+    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: '#08090e' }}>
+      {/* Header */}
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid #14162a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <span style={{ fontSize: '11px', color: '#484d5a' }}>
+          {logs.length}줄
+        </span>
+        <button
+          onClick={clearLogs}
+          style={{ background: 'none', border: '1px solid #1a1d2e', color: '#484d5a', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
+        >
+          지우기
+        </button>
       </div>
-      <div style={{ flex: 1, overflow: 'auto', padding: '8px', fontFamily: 'monospace', fontSize: '12px' }}>
-        {events.length === 0 && (
-          <div style={{ color: '#8b949e', padding: '8px' }}>이벤트 대기 중...</div>
+
+      {/* Log content */}
+      <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', fontFamily: 'monospace', fontSize: '11px', lineHeight: 1.6, minHeight: 0 }}>
+        {logs.length === 0 && (
+          <div style={{ color: '#252838', textAlign: 'center', marginTop: '40px', fontSize: '12px', fontFamily: 'inherit' }}>
+            앱을 실행하면 로그가 여기에 표시됩니다
+          </div>
         )}
-        {events.map((e, i) => (
-          <div key={i} style={{ marginBottom: '4px', lineHeight: 1.4 }}>
-            <span style={{ color: '#8b949e' }}>{new Date(e.timestamp || e.created_at).toLocaleTimeString()} </span>
-            <span style={{ color: typeColor[e.type] || '#e6edf3' }}>[{e.type}] </span>
-            <span style={{ color: '#e6edf3' }}>{JSON.stringify(typeof e.data === 'string' ? JSON.parse(e.data) : e.data)}</span>
+        {logs.map((log, i) => (
+          <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '1px' }}>
+            <span style={{ color: '#2e3244', flexShrink: 0 }}>
+              {new Date(log.time).toLocaleTimeString('ko-KR', { hour12: false })}
+            </span>
+            <span style={{ color: streamColor(log.stream), wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+              {log.text}
+            </span>
           </div>
         ))}
         <div ref={bottomRef} />

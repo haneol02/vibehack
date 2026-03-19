@@ -31,6 +31,10 @@ router.post('/:slug/stop', async (req, res) => {
   }
 });
 
+router.get('/:slug/logs', (req, res) => {
+  res.json(appManager.getLogs(req.params.slug));
+});
+
 router.get('/:slug', (req, res) => {
   const project = db.prepare('SELECT * FROM projects WHERE slug = ?').get(req.params.slug);
   if (!project) return res.status(404).json({ error: 'project not found' });
