@@ -17,7 +17,7 @@ export default function Session({ slug }) {
   const [app, setApp] = useState(null);
   const [startCmd, setStartCmd] = useState('npm start');
   const [tab, setTab] = useState('chat');
-  const [mobileView, setMobileView] = useState('chat'); // 'preview' | 'chat'
+  const [mobileView, setMobileView] = useState('chat');
   const iframeRef = useRef(null);
   const domain = window.location.hostname;
 
@@ -119,7 +119,6 @@ export default function Session({ slug }) {
         .control-bar-extras { display: contents; }
         @media (max-width: 768px) {
           .session-grid { grid-template-columns: 1fr; }
-          .desktop-tabs { display: none; }
           .control-bar-extras { display: none; }
           .control-bar { flex-wrap: wrap; gap: 6px !important; padding: 8px 12px !important; }
           .control-bar input { width: 120px !important; }
@@ -131,13 +130,12 @@ export default function Session({ slug }) {
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border-primary)', background: 'var(--bg-secondary)', flexShrink: 0 }}>
           <button onClick={() => setMobileView('chat')} style={mobileTabStyle(mobileView === 'chat')}>채팅</button>
           <button onClick={() => setMobileView('preview')} style={mobileTabStyle(mobileView === 'preview')}>미리보기</button>
-          <button onClick={() => setMobileView('logs')} style={mobileTabStyle(mobileView === 'logs')}>로그</button>
         </div>
       )}
 
       <div className="session-grid">
         {/* Left: App preview */}
-        <div className="session-left" style={isMobile && mobileView === 'chat' ? { display: 'none' } : undefined}>
+        <div className="session-left" style={isMobile && mobileView !== 'preview' ? { display: 'none' } : undefined}>
           {/* App control bar */}
           <div className="control-bar" style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, background: 'var(--bg-secondary)', flexWrap: 'wrap' }}>
             {/* Row 1: Command input + app controls */}
@@ -207,9 +205,7 @@ export default function Session({ slug }) {
 
           {/* App iframe or logs (mobile) */}
           <div style={{ flex: 1, position: 'relative', background: 'var(--bg-secondary)' }}>
-            {isMobile && mobileView === 'logs' ? (
-              <LogPanel slug={slug} projectId={project?.id} />
-            ) : app?.status === 'running' ? (
+            {app?.status === 'running' ? (
               <iframe
                 ref={iframeRef}
                 src={appUrl}
@@ -227,7 +223,7 @@ export default function Session({ slug }) {
         </div>
 
         {/* Right: Chat / Logs with tab switching */}
-        <div className="session-right" style={isMobile && mobileView !== 'chat' ? { display: 'none' } : undefined}>
+        <div className="session-right" style={isMobile && mobileView === 'preview' ? { display: 'none' } : undefined}>
           {/* Tab bar (desktop) */}
           <div className="desktop-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--border-primary)', flexShrink: 0, background: 'var(--bg-secondary)' }}>
             <button onClick={() => setTab('chat')} style={tabStyle(tab === 'chat')}>
