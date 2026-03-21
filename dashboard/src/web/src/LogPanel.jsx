@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 export default function LogPanel({ slug, projectId }) {
   const [logs, setLogs] = useState([]);
+  const [filter, setFilter] = useState('all'); // 'all' | 'stdout' | 'stderr' | 'system'
   const bottomRef = useRef(null);
   const autoScrollRef = useRef(true);
   const containerRef = useRef(null);
@@ -60,31 +61,58 @@ export default function LogPanel({ slug, projectId }) {
 
   const clearLogs = () => setLogs([]);
 
+  const filteredLogs = filter === 'all' ? logs : logs.filter(l => l.stream === filter);
+  const errCount = logs.filter(l => l.stream === 'stderr').length;
+
+  const filterBtnStyle = (active) => ({
+    background: active ? 'var(--accent-bg)' : 'none',
+    border: 'none',
+    color: active ? 'var(--accent)' : 'var(--text-muted)',
+    fontSize: '10px',
+    padding: '2px 6px',
+    borderRadius: '3px',
+    cursor: 'pointer',
+    fontWeight: active ? 600 : 400,
+  });
+
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
       {/* Header */}
-      <div style={{ padding: '8px 16px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-          {logs.length}줄
-        </span>
-        <button
-          onClick={clearLogs}
-          style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--text-muted)', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
-        >
-          지우기
-        </button>
+      <div style={{ padding: '6px 12px', borderBottom: '1px solid var(--border-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <button onClick={() => setFilter('all')} style={filterBtnStyle(filter === 'all')}>전체</button>
+          <button onClick={() => setFilter('stdout')} style={filterBtnStyle(filter === 'stdout')}>stdout</button>
+          <button onClick={() => setFilter('stderr')} style={{
+            ...filterBtnStyle(filter === 'stderr'),
+            color: filter === 'stderr' ? 'var(--log-stderr)' : errCount > 0 ? 'var(--log-stderr)' : 'var(--text-muted)',
+          }}>
+            stderr{errCount > 0 && ` (${errCount})`}
+          </button>
+          <button onClick={() => setFilter('system')} style={filterBtnStyle(filter === 'system')}>system</button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+            {filteredLogs.length}줄
+          </span>
+          <button
+            onClick={clearLogs}
+            style={{ background: 'none', border: '1px solid var(--border-secondary)', color: 'var(--text-muted)', borderRadius: '4px', fontSize: '10px', padding: '2px 8px', cursor: 'pointer' }}
+          >
+            지우기
+          </button>
+        </div>
       </div>
 
       {/* Log content */}
       <div ref={containerRef} style={{ flex: 1, overflowY: 'auto', padding: '8px 12px', fontFamily: 'monospace', fontSize: '11px', lineHeight: 1.6, minHeight: 0 }}>
-        {logs.length === 0 && (
+        {filteredLogs.length === 0 && (
           <div style={{ color: 'var(--text-faint)', textAlign: 'center', marginTop: '40px', fontSize: '12px', fontFamily: 'inherit' }}>
-            앱을 실행하면 로그가 여기에 표시됩니다
+            {logs.length === 0 ? '앱을 실행하면 로그가 여기에 표시됩니다' : '해당 필터에 맞는 로그가 없습니다'}
           </div>
         )}
-        {logs.map((log, i) => (
+        {filteredLogs.map((log, i) => (
           <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: '1px' }}>
-            <span style={{ color: 'var(--log-timestamp)', flexShrink: 0, userSelect: 'none' }}>
+            <span style={{ color: 'var(--log-timestamp)', flexShrink: 0, userSelect: 'none', fontSize: '10px' }}>
               {log.time ? new Date(log.time).toLocaleTimeString('ko-KR', { hour12: false }) : '--:--:--'}
             </span>
             <span style={{ color: streamColor(log.stream), wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>

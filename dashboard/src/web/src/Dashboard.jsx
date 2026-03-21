@@ -42,8 +42,15 @@ export default function Dashboard() {
   const statusLabel = (s) => s === 'running' ? '실행 중' : '중단됨';
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto' }}><div style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 60px' }}>
-      <style>{`.hero-title { white-space: nowrap; } @media (max-width: 560px) { .hero-title { white-space: normal; } }`}</style>
+    <div style={{ height: '100%', overflowY: 'auto' }}><div className="dashboard-wrap" style={{ maxWidth: '900px', margin: '0 auto', padding: '48px 32px 60px' }}>
+      <style>{`
+        .hero-title { white-space: nowrap; }
+        @media (max-width: 560px) {
+          .hero-title { white-space: normal; }
+          .dashboard-wrap { padding: 24px 16px 40px !important; }
+          .project-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
 
       {/* New project form */}
       <div style={{ textAlign: 'center', marginBottom: '56px' }}>
@@ -100,7 +107,7 @@ export default function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-muted)' }}>내 프로젝트 ({projects.length})</h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
+          <div className="project-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
             {projects.map(p => (
               <ProjectCard
                 key={p.id}
